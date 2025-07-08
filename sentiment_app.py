@@ -9,11 +9,11 @@ import re
 from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import cosine
 from transformers import pipeline
+import torch
 
 # === CONFIGURARE ===
 
 sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-import torch
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 embedding_model = embedding_model.to(torch.device("cpu"))
 
@@ -110,14 +110,10 @@ def genereaza_rezumat_emotional():
             st.info("Your journal is empty.")
             return
 
-        # Text complet
         full_text = "\n".join([json.loads(line)["text"] for line in lines])
-
-        # Limitare la 1024 de tokens pentru model
         if len(full_text) > 3000:
             full_text = full_text[:3000]
 
-        # Generare rezumat local
         summary = summarizer(full_text, max_length=130, min_length=30, do_sample=False)
 
         st.subheader("🧠 Emotional Summary")
@@ -125,7 +121,6 @@ def genereaza_rezumat_emotional():
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
-
 
 def deep_research():
     try:
