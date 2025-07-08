@@ -4,5 +4,5 @@ matplotlib
 sentence-transformers
 transformers
 scikit-learn
-torch
+torch==1.13.1
 huggingface_hub
