@@ -7,7 +7,6 @@ from datetime import datetime
 from collections import Counter
 import re
 from scipy.spatial.distance import cosine
-import torch
 
 # === CONFIGURARE ===
 try:
@@ -18,20 +17,6 @@ except Exception as e:
     sentiment_analyzer = None
     summarizer = None
     st.error("❌ Eroare la încărcarea pachetelor 'transformers' sau la inițializare.")
-
-embedding_model = None
-
-# === ÎNCĂRCARE MODEL DE SIMILARITATE LA CERERE ===
-def get_embedding_model():
-    global embedding_model
-    if embedding_model is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-        except Exception:
-            embedding_model = None
-            st.warning("⚠️ Modelul de similaritate nu a fost încărcat. Funcția de comparare este dezactivată.")
-    return embedding_model
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
@@ -88,6 +73,25 @@ def afiseaza_grafic_sentimente():
     except Exception as e:
         st.warning(f"Nu s-au putut încărca datele. Detalii: {e}")
 
+def genereaza_rezumat_emotional():
+    try:
+        if not os.path.exists("journal_entries.json"):
+            st.warning("No journal data found.")
+            return
+        with open("journal_entries.json", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        if not lines:
+            st.info("Your journal is empty.")
+            return
+        full_text = "\n".join([json.loads(line)["text"] for line in lines])
+        if len(full_text) > 3000:
+            full_text = full_text[:3000]
+        summary = summarizer(full_text, max_length=130, min_length=30, do_sample=False)
+        st.subheader("🧠 Emotional Summary")
+        st.markdown(summary[0]['summary_text'])
+    except Exception as e:
+        st.error(f"Eroare la generarea rezumatului: {e}")
+
 # === INTERFAȚĂ STREAMLIT ===
 st.title("🔍 Analiză Sentiment - Demo Alexandru Florin Drăghici")
 
@@ -118,20 +122,7 @@ if submit and text_jurnal.strip():
     st.success(f"✅ Journal saved — Label: {rezultat[0]['label']}, Score: {rezultat[0]['score']:.4f}")
 
 if st.button("🔎 Deep Research – Analyze your journal"):
-    st.warning("🔧 Funcția de comparare nu este activată momentan din cauza modelului de similaritate.")
+    st.info("🔎 Această funcție va fi disponibilă în versiunea următoare.")
 
 if st.button("🧠 Generate Emotional Summary"):
-    try:
-        if not os.path.exists("journal_entries.json"):
-            st.warning("No journal data found.")
-        else:
-            with open("journal_entries.json", "r", encoding="utf-8") as f:
-                lines = f.readlines()
-            full_text = "\n".join([json.loads(line)["text"] for line in lines])
-            if len(full_text) > 3000:
-                full_text = full_text[:3000]
-            summary = summarizer(full_text, max_length=130, min_length=30, do_sample=False)
-            st.subheader("🧠 Emotional Summary")
-            st.markdown(summary[0]['summary_text'])
-    except Exception as e:
-        st.error(f"❌ Eroare la generarea rezumatului: {e}")
+    genereaza_rezumat_emotional()
