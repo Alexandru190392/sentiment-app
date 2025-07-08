@@ -9,14 +9,15 @@ import re
 from scipy.spatial.distance import cosine
 import torch
 
-# === CONFIGURARE ===
-try:
-    from dotenv import load_dotenv
+# === AUTENTIFICARE HUGGING FACE ===
+from dotenv import load_dotenv
 load_dotenv()
 
 from huggingface_hub import login
 login(os.getenv("HF_TOKEN"))
 
+# === CONFIGURARE ===
+try:
     from transformers import pipeline
     sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
