@@ -26,12 +26,19 @@ except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la încărcarea modelului de similaritate.")
 
-# === FUNCȚII ===
+# === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
-    return sentiment_analyzer(text) if sentiment_analyzer else [{"label": "N/A", "score": 0.0}]
+    if sentiment_analyzer:
+        return sentiment_analyzer(text)
+    else:
+        return [{"label": "N/A", "score": 0.0}]
 
 def salveaza_rezultatul(text, result):
-    data = {"text": text.strip(), "result": result, "timestamp": datetime.now().isoformat()}
+    data = {
+        "text": text.strip(),
+        "result": result,
+        "timestamp": datetime.now().isoformat()
+    }
     with open("result.json", "a", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
         f.write("\n")
@@ -41,45 +48,53 @@ def adauga_feedback(feedback):
         f.write(f"{datetime.now().isoformat()} - {feedback}\n")
 
 def salveaza_intrare_jurnal(text, rezultat, tema=None):
-    data = {"text": text.strip(), "result": rezultat, "timestamp": datetime.now().isoformat()}
-    if tema: data["tema"] = tema
+    data = {
+        "text": text.strip(),
+        "result": rezultat,
+        "timestamp": datetime.now().isoformat()
+    }
+    if tema:
+        data["tema"] = tema
     with open("journal_entries.json", "a", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
         f.write("\n")
 
-def find_similar_entry(current_text, threshold=0.8):
-    if embedding_model is None or not os.path.exists("journal_entries.json"):
+def find_similar_entry(current_text, similarity_threshold=0.8):
+    if embedding_model is None:
         return None
     current_vector = embedding_model.encode(current_text)
-    most_similar = None
-    highest_sim = 0
+    if not os.path.exists("journal_entries.json"):
+        return None
     with open("journal_entries.json", "r", encoding="utf-8") as f:
-        for line in f:
-            try:
-                entry = json.loads(line)
-                previous_vector = embedding_model.encode(entry["text"])
-                similarity = 1 - cosine(current_vector, previous_vector)
-                if similarity > highest_sim and similarity >= threshold:
-                    highest_sim = similarity
-                    most_similar = {
-                        "timestamp": entry["timestamp"],
-                        "label": entry["result"][0]["label"],
-                        "score": entry["result"][0]["score"],
-                        "similarity": similarity
-                    }
-            except Exception:
-                continue
+        lines = f.readlines()
+    most_similar = None
+    highest_similarity = 0
+    for line in lines:
+        try:
+            entry = json.loads(line)
+            previous_vector = embedding_model.encode(entry["text"])
+            similarity = 1 - cosine(current_vector, previous_vector)
+            if similarity > highest_similarity and similarity >= similarity_threshold:
+                highest_similarity = similarity
+                most_similar = {
+                    "timestamp": entry["timestamp"],
+                    "label": entry["result"][0]["label"],
+                    "score": entry["result"][0]["score"],
+                    "similarity": similarity
+                }
+        except Exception:
+            continue
     return most_similar
 
 def afiseaza_grafic_sentimente():
     try:
         with open("result.json", "r", encoding="utf-8") as f:
-            data = [json.loads(line) for line in f]
+            data = [json.loads(line) for line in f.readlines()]
         df = pd.DataFrame([{
-            "timestamp": e["timestamp"],
-            "score": e["result"][0]["score"],
-            "label": e["result"][0]["label"]
-        } for e in data])
+            "timestamp": entry["timestamp"],
+            "score": entry["result"][0]["score"],
+            "label": entry["result"][0]["label"]
+        } for entry in data])
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         fig, ax = plt.subplots()
         for label in df["label"].unique():
@@ -91,23 +106,7 @@ def afiseaza_grafic_sentimente():
         ax.legend()
         st.pyplot(fig)
     except Exception as e:
-        st.warning(f"Eroare la încărcarea datelor: {e}")
-
-def genereaza_rezumat_emotional():
-    try:
-        if not os.path.exists("journal_entries.json"):
-            st.warning("Nu există date.")
-            return
-        with open("journal_entries.json", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        text = "\n".join([json.loads(line)["text"] for line in lines])
-        if len(text) > 3000:
-            text = text[:3000]
-        summary = summarizer(text, max_length=130, min_length=30, do_sample=False)
-        st.subheader("🧠 Emotional Summary")
-        st.markdown(summary[0]['summary_text'])
-    except Exception as e:
-        st.error(f"Eroare la rezumat: {e}")
+        st.warning(f"Nu s-au putut încărca datele. Detalii: {e}")
 
 def deep_research():
     try:
