@@ -7,13 +7,16 @@ from datetime import datetime
 from collections import Counter
 import re
 from scipy.spatial.distance import cosine
-from transformers import pipeline
 import torch
 
 # === CONFIGURARE ===
-sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
+try:
+    from transformers import pipeline
+    sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
+except Exception as e:
+    st.error("❌ Eroare la inițializarea analizei de sentiment. Verifică pachetele 'transformers' și 'torch'.")
+    sentiment_analyzer = None
 
-# eliminăm temporar SentenceTransformer deoarece Streamlit Cloud are probleme cu torch.compiler
 try:
     from sentence_transformers import SentenceTransformer
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -24,7 +27,10 @@ except Exception as e:
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
-    return sentiment_analyzer(text)
+    if sentiment_analyzer:
+        return sentiment_analyzer(text)
+    else:
+        return [{"label": "N/A", "score": 0.0}]
 
 def salveaza_rezultatul(text, result):
     data = {
