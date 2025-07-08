@@ -13,21 +13,22 @@ import torch
 try:
     from transformers import pipeline
     pipeline_available = True
-except Exception as e:
+except Exception:
     pipeline_available = False
     st.error("❌ Eroare la încărcarea pachetului 'transformers'.")
 
 if pipeline_available:
     try:
         sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-    except Exception as e:
+    except Exception:
         sentiment_analyzer = None
-        st.error("❌ Eroare la inițializarea analizei de sentiment. Verifică pachetele 'transformers' și 'torch'.")
+        st.error("❌ Eroare la inițializarea analizei de sentiment.")
+
     try:
-        
-    except Exception as e:
+        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    except Exception:
         summarizer = None
-        st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
+        st.error("❌ Eroare la inițializarea sumarizatorului.")
 else:
     sentiment_analyzer = None
     summarizer = None
@@ -36,11 +37,11 @@ try:
     from sentence_transformers import SentenceTransformer
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     embedding_model = embedding_model.to(torch.device("cpu"))
-except Exception as e:
+except Exception:
     embedding_model = None
-    st.error("❌ Eroare la inițializarea modelului de similaritate. Funcția de comparare a jurnalelor va fi dezactivată.")
+    st.error("❌ Eroare la inițializarea modelului de similaritate.")
 
-# === FUNCȚII PRINCIPALE ===
+# === FUNCȚII ===
 def analizeaza_sentimentul(text):
     if sentiment_analyzer:
         return sentiment_analyzer(text)
@@ -48,11 +49,7 @@ def analizeaza_sentimentul(text):
         return [{"label": "N/A", "score": 0.0}]
 
 def salveaza_rezultatul(text, result):
-    data = {
-        "text": text.strip(),
-        "result": result,
-        "timestamp": datetime.now().isoformat()
-    }
+    data = {"text": text.strip(), "result": result, "timestamp": datetime.now().isoformat()}
     with open("result.json", "a", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
         f.write("\n")
@@ -62,11 +59,7 @@ def adauga_feedback(feedback):
         f.write(f"{datetime.now().isoformat()} - {feedback}\n")
 
 def salveaza_intrare_jurnal(text, rezultat, tema=None):
-    data = {
-        "text": text.strip(),
-        "result": rezultat,
-        "timestamp": datetime.now().isoformat()
-    }
+    data = {"text": text.strip(), "result": rezultat, "timestamp": datetime.now().isoformat()}
     if tema:
         data["tema"] = tema
     with open("journal_entries.json", "a", encoding="utf-8") as f:
@@ -81,8 +74,7 @@ def find_similar_entry(current_text, similarity_threshold=0.8):
         return None
     with open("journal_entries.json", "r", encoding="utf-8") as f:
         lines = f.readlines()
-    most_similar = None
-    highest_similarity = 0
+    most_similar, highest_similarity = None, 0
     for line in lines:
         try:
             entry = json.loads(line)
@@ -122,43 +114,36 @@ def afiseaza_grafic_sentimente():
     except Exception as e:
         st.warning(f"Nu s-au putut încărca datele. Detalii: {e}")
 
-# === Sumarizare text ===
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-
 def genereaza_rezumat_emotional():
     try:
-        if not os.path.exists("journal_entries.json"):
-            st.warning("No journal data found.")
+        if not summarizer:
+            st.error("❌ Funcția de rezumat nu este disponibilă.")
             return
-
+        if not os.path.exists("journal_entries.json"):
+            st.warning("Nu există date salvate.")
+            return
         with open("journal_entries.json", "r", encoding="utf-8") as f:
             lines = f.readlines()
-
         if not lines:
-            st.info("Your journal is empty.")
+            st.info("Jurnalul este gol.")
             return
-
         full_text = "\n".join([json.loads(line)["text"] for line in lines])
-        if len(full_text) > 3000:
-            full_text = full_text[:3000]
-
+        full_text = full_text[:3000]
         summary = summarizer(full_text, max_length=130, min_length=30, do_sample=False)
-
         st.subheader("🧠 Emotional Summary")
         st.markdown(summary[0]['summary_text'])
-
     except Exception as e:
-        st.error(f"Something went wrong: {e}")
+        st.error(f"Eroare la generarea rezumatului: {e}")
 
 def deep_research():
     try:
         if not os.path.exists("journal_entries.json"):
-            st.info("No journal data found.")
+            st.info("Nu există date salvate.")
             return
         with open("journal_entries.json", "r", encoding="utf-8") as f:
             data = [json.loads(line) for line in f.readlines()]
         if not data:
-            st.info("Journal is empty.")
+            st.info("Jurnalul este gol.")
             return
         df = pd.DataFrame([{
             "timestamp": entry["timestamp"],
@@ -166,25 +151,24 @@ def deep_research():
             "label": entry["result"][0]["label"],
             "text": entry["text"]
         } for entry in data])
-        st.subheader("📊 Emotional distribution")
+        st.subheader("📊 Distribuția emoțională")
         st.bar_chart(df["label"].value_counts())
         st.subheader("🔍 Insights")
-        st.markdown(f"**Average score:** {df['score'].mean():.3f}")
-        st.markdown(f"**Most positive day:** {df.loc[df['score'].idxmax()]['timestamp']} — Score: {df['score'].max():.3f}")
-        st.markdown(f"**Most negative day:** {df.loc[df['score'].idxmin()]['timestamp']} — Score: {df['score'].min():.3f}")
-        all_text = " ".join(df["text"])
-        words = re.findall(r"\b\w{4,}\b", all_text.lower())
+        st.markdown(f"**Scor mediu:** {df['score'].mean():.3f}")
+        st.markdown(f"**Ziua cea mai pozitivă:** {df.loc[df['score'].idxmax()]['timestamp']}")
+        st.markdown(f"**Ziua cea mai negativă:** {df.loc[df['score'].idxmin()]['timestamp']}")
+        words = re.findall(r"\b\w{4,}\b", " ".join(df["text"]).lower())
         common_words = Counter(words).most_common(5)
-        st.subheader("🧠 Top 5 most frequent words")
+        st.subheader("🧠 Cele mai frecvente 5 cuvinte")
         for word, freq in common_words:
-            st.write(f"{word} — {freq} times")
+            st.write(f"{word} — {freq} ori")
     except Exception as e:
-        st.error(f"Something went wrong: {e}")
+        st.error(f"A apărut o eroare: {e}")
 
 # === INTERFAȚĂ STREAMLIT ===
 st.title("🔍 Analiză Sentiment - Demo Alexandru Florin Drăghici")
 
-if st.button("📈 Vezi graficul cu evoluția sentimentelor"):
+if st.button("📈 Vezi graficul"):
     afiseaza_grafic_sentimente()
 
 text_input = st.text_area("✏️ Introdu textul pentru analiză:")
@@ -193,32 +177,17 @@ if st.button("🔍 Analizează"):
         rezultat = analizeaza_sentimentul(text_input)
         st.success(f"Etichetă: {rezultat[0]['label']} — Scor: {rezultat[0]['score']:.4f}")
         salveaza_rezultatul(text_input, rezultat)
-        feedback = st.radio("📊 A fost analiza utilă?", ["Da", "Nu"])
+        feedback = st.radio("📊 A fost utilă analiza?", ["Da", "Nu"])
         if st.button("📤 Trimite feedback"):
             adauga_feedback(feedback)
-            st.info("✅ Feedback salvat. Mulțumim!")
+            st.info("✅ Feedback salvat.")
     else:
-        st.warning("Te rugăm să introduci un text.")
+        st.warning("⚠️ Introdu un text.")
 
-st.header("📓 Emotional Journal – Reflect and Grow")
+st.header("📓 Jurnal Emoțional")
 with st.form("journal_form"):
-    tema_zilei = st.text_input("Optional: Today's topic")
-    text_jurnal = st.text_area("Write your thoughts here (as much as you want):", height=300)
-    submit = st.form_submit_button("📝 Save Journal")
+    tema_zilei = st.text_input("Temă opțională:")
+    text_jurnal = st.text_area("Scrie aici:", height=300)
+    submit = st.form_submit_button("📝 Salvează jurnal")
 if submit and text_jurnal.strip():
-    rezultat = analizeaza_sentimentul(text_jurnal)
-    salveaza_intrare_jurnal(text_jurnal, rezultat, tema_zilei)
-    similar_entry = find_similar_entry(text_jurnal)
-    if similar_entry:
-        st.warning(
-            f"This journal entry is emotionally similar to what you wrote on "
-            f"{similar_entry['timestamp'][:10]} (Label: {similar_entry['label']}, "
-            f"Score: {similar_entry['score']:.2f}, Similarity: {similar_entry['similarity']:.2f})"
-        )
-    st.success(f"✅ Journal saved — Label: {rezultat[0]['label']}, Score: {rezultat[0]['score']:.4f}")
-
-if st.button("🔎 Deep Research – Analyze your journal"):
-    deep_research()
-
-if st.button("🧠 Generate Emotional Summary"):
-    genereaza_rezumat_emotional()
+    rezultat = analizeaza_sent_
