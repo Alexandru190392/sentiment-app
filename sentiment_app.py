@@ -11,15 +11,6 @@ import torch
 
 # === CONFIGURARE ===
 try:
-    from transformers import pipeline
-    sentiment_analyzer = pipeline("sentiment-analysis")
-    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-except Exception as e:
-    sentiment_analyzer = None
-    summarizer = None
-    st.error("❌ Eroare la încărcarea pachetelor 'transformers' sau la inițializare.")
-
-try:
     from sentence_transformers import SentenceTransformer
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 except Exception as e:
