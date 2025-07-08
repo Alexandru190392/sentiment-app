@@ -28,7 +28,7 @@ except Exception as e:
 
 try:
     from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2").to(torch.device("cpu"))
+    embedding_model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2").to(torch.device("cpu"))
 except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la încărcarea modelului de similaritate.")
