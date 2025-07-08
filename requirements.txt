@@ -7,3 +7,4 @@ torch==2.0.1
 sentence-transformers==2.2.2
 scipy
 huggingface_hub
+python-dotenv
