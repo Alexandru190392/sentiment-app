@@ -25,7 +25,7 @@ def init_embedding_model():
     global embedding_model
     try:
         from sentence_transformers import SentenceTransformer
-        embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     except Exception as e:
         embedding_model = None
         st.warning("⚠️ Modelul de similaritate nu a fost încărcat. Funcția de comparare este dezactivată.")
