@@ -13,7 +13,7 @@ import torch
 @st.cache_resource
 def load_sentiment_model():
     from transformers import pipeline
-    return pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+    return pipeline("sentiment-analysis")
 
 @st.cache_resource
 def load_summarizer_model():
