@@ -8,33 +8,34 @@ from collections import Counter
 import re
 from scipy.spatial.distance import cosine
 import torch
+from dotenv import load_dotenv
+from huggingface_hub import login
 
 # === AUTENTIFICARE HUGGING FACE ===
-from dotenv import load_dotenv
 load_dotenv()
-
-from huggingface_hub import login
 login(os.getenv("HF_TOKEN"))
 
 # === CONFIGURARE ===
-try:
-    from transformers import pipeline
-    sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-except Exception as e:
-    sentiment_analyzer = None
-    summarizer = None
-    st.error("❌ Eroare la încărcarea pachetelor 'transformers' sau la inițializare.")
+from transformers import pipeline
+from sentence_transformers import SentenceTransformer
 
-try:
-    from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2").to(torch.device("cpu"))
-except Exception as e:
-    embedding_model = None
-    st.error("❌ Eroare la încărcarea modelului de similaritate.")
+sentiment_analyzer = None
+summarizer = None
+embedding_model = None
+
+def init_models():
+    global sentiment_analyzer, summarizer, embedding_model
+    with st.spinner("🔄 Se încarcă modelele..."):
+        if not sentiment_analyzer:
+            sentiment_analyzer = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+        if not summarizer:
+            summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+        if not embedding_model:
+            embedding_model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2")
 
 # === FUNCȚII ===
 def analizeaza_sentimentul(text):
+    init_models()
     return sentiment_analyzer(text) if sentiment_analyzer else [{"label": "N/A", "score": 0.0}]
 
 def salveaza_rezultatul(text, result):
@@ -48,13 +49,16 @@ def adauga_feedback(feedback):
         f.write(f"{datetime.now().isoformat()} - {feedback}\n")
 
 def salveaza_intrare_jurnal(text, rezultat, tema=None):
+    init_models()
     data = {"text": text.strip(), "result": rezultat, "timestamp": datetime.now().isoformat()}
-    if tema: data["tema"] = tema
+    if tema:
+        data["tema"] = tema
     with open("journal_entries.json", "a", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
         f.write("\n")
 
 def find_similar_entry(current_text, threshold=0.8):
+    init_models()
     if embedding_model is None or not os.path.exists("journal_entries.json"):
         return None
     current_vector = embedding_model.encode(current_text)
@@ -101,6 +105,7 @@ def afiseaza_grafic_sentimente():
         st.warning(f"Eroare la încărcarea datelor: {e}")
 
 def genereaza_rezumat_emotional():
+    init_models()
     try:
         if not os.path.exists("journal_entries.json"):
             st.warning("Nu există date.")
