@@ -12,10 +12,24 @@ import torch
 # === CONFIGURARE ===
 try:
     from transformers import pipeline
-    sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
 except Exception as e:
-    st.error("❌ Eroare la inițializarea analizei de sentiment. Verifică pachetele 'transformers' și 'torch'.")
+    pipeline = None
+    st.error("❌ Eroare la încărcarea pachetului 'transformers'.")
+
+if pipeline:
+    try:
+        sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
+    except Exception as e:
+        sentiment_analyzer = None
+        st.error("❌ Eroare la inițializarea analizei de sentiment. Verifică pachetele 'transformers' și 'torch'.")
+    try:
+        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    except Exception as e:
+        summarizer = None
+        st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
+else:
     sentiment_analyzer = None
+    summarizer = None
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -24,12 +38,6 @@ try:
 except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la inițializarea modelului de similaritate. Funcția de comparare a jurnalelor va fi dezactivată.")
-
-try:
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-except Exception as e:
-    summarizer = None
-    st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
