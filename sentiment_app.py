@@ -10,14 +10,11 @@ from scipy.spatial.distance import cosine
 import torch
 
 # === CONFIGURARE ===
-try:
-    from transformers import pipeline
-    sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-except Exception as e:
-    sentiment_analyzer = None
-    summarizer = None
-    st.error("❌ Eroare la încărcarea analizatorului sau sumarizatorului.")
+    try:
+        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    except Exception as e:
+        summarizer = None
+        st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
 
 try:
     from sentence_transformers import SentenceTransformer
