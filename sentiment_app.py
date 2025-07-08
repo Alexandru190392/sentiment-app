@@ -12,7 +12,7 @@ import torch
 # === CONFIGURARE ===
 try:
     from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la încărcarea modelului de similaritate.")
