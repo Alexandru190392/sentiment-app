@@ -11,11 +11,24 @@ import torch
 
 # === CONFIGURARE ===
 try:
-    from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+    from transformers import pipeline
+    sentiment_analyzer = pipeline("sentiment-analysis")
+    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 except Exception as e:
-    embedding_model = None
-    st.error("❌ Eroare la încărcarea modelului de similaritate.")
+    sentiment_analyzer = None
+    summarizer = None
+    st.error("❌ Eroare la încărcarea pachetelor 'transformers' sau la inițializare.")
+
+embedding_model = None
+
+def init_embedding_model():
+    global embedding_model
+    try:
+        from sentence_transformers import SentenceTransformer
+        embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+    except Exception as e:
+        embedding_model = None
+        st.warning("⚠️ Modelul de similaritate nu a fost încărcat. Funcția de comparare este dezactivată.")
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
@@ -51,6 +64,8 @@ def salveaza_intrare_jurnal(text, rezultat, tema=None):
         f.write("\n")
 
 def find_similar_entry(current_text, similarity_threshold=0.8):
+    if embedding_model is None:
+        init_embedding_model()
     if embedding_model is None:
         return None
     current_vector = embedding_model.encode(current_text)
