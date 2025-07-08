@@ -12,11 +12,12 @@ import torch
 # === CONFIGURARE ===
 try:
     from transformers import pipeline
+    pipeline_available = True
 except Exception as e:
-    pipeline = None
+    pipeline_available = False
     st.error("❌ Eroare la încărcarea pachetului 'transformers'.")
 
-if pipeline:
+if pipeline_available:
     try:
         sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
     except Exception as e:
