@@ -20,7 +20,7 @@ login(os.getenv("HF_TOKEN"))
 try:
     from transformers import pipeline
     sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 except Exception as e:
     sentiment_analyzer = None
     summarizer = None
