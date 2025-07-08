@@ -2,7 +2,7 @@ streamlit
 pandas
 matplotlib
 scikit-learn
-transformers==4.30.2
-torch==2.0.1
-sentence-transformers==2.2.2
 scipy
+transformers==4.28.1
+torch==1.13.1
+sentence-transformers==2.2.2
