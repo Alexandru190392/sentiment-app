@@ -25,6 +25,12 @@ except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la inițializarea modelului de similaritate. Funcția de comparare a jurnalelor va fi dezactivată.")
 
+try:
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+except Exception as e:
+    summarizer = None
+    st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
+
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
     if sentiment_analyzer:
