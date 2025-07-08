@@ -6,16 +6,21 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from collections import Counter
 import re
-from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import cosine
 from transformers import pipeline
 import torch
 
 # === CONFIGURARE ===
-
 sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-embedding_model = embedding_model.to(torch.device("cpu"))
+
+# eliminăm temporar SentenceTransformer deoarece Streamlit Cloud are probleme cu torch.compiler
+try:
+    from sentence_transformers import SentenceTransformer
+    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embedding_model = embedding_model.to(torch.device("cpu"))
+except Exception as e:
+    embedding_model = None
+    st.error("❌ Eroare la inițializarea modelului de similaritate. Funcția de comparare a jurnalelor va fi dezactivată.")
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
@@ -48,6 +53,8 @@ def salveaza_intrare_jurnal(text, rezultat, tema=None):
         f.write("\n")
 
 def find_similar_entry(current_text, similarity_threshold=0.8):
+    if embedding_model is None:
+        return None
     current_vector = embedding_model.encode(current_text)
     if not os.path.exists("journal_entries.json"):
         return None
@@ -94,7 +101,7 @@ def afiseaza_grafic_sentimente():
     except Exception as e:
         st.warning(f"Nu s-au putut încărca datele. Detalii: {e}")
 
-# Inițializare sumarizator local (huggingface)
+# === Sumarizare text ===
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
 def genereaza_rezumat_emotional():
