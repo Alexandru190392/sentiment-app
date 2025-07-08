@@ -24,7 +24,7 @@ if pipeline_available:
         sentiment_analyzer = None
         st.error("❌ Eroare la inițializarea analizei de sentiment. Verifică pachetele 'transformers' și 'torch'.")
     try:
-        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+        
     except Exception as e:
         summarizer = None
         st.error("❌ Eroare la inițializarea sumarizatorului. Funcția de rezumat nu este disponibilă.")
