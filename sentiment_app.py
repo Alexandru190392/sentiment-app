@@ -18,12 +18,12 @@ def load_sentiment_model():
 @st.cache_resource
 def load_summarizer_model():
     from transformers import pipeline
-    return pipeline("summarization", model="sshleifer/distilbart-cnn-6-6")
+    return pipeline("summarization")
 
 @st.cache_resource
 def load_embedding_model():
     from sentence_transformers import SentenceTransformer
-    return SentenceTransformer("paraphrase-MiniLM-L6-v2")
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
 try:
     sentiment_analyzer = load_sentiment_model()
