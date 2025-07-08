@@ -4,3 +4,5 @@ matplotlib
 sentence-transformers
 transformers
 scikit-learn
+torch==2.0.1
+sentence-transformers==2.2.2
