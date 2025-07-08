@@ -12,8 +12,8 @@ import torch
 # === CONFIGURARE ===
 try:
     from transformers import pipeline
-    sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    sentiment_analyzer = pipeline("sentiment-analysis")
+    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 except Exception as e:
     sentiment_analyzer = None
     summarizer = None
@@ -21,7 +21,7 @@ except Exception as e:
 
 try:
     from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2").to(torch.device("cpu"))
+    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 except Exception as e:
     embedding_model = None
     st.error("❌ Eroare la încărcarea modelului de similaritate.")
