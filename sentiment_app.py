@@ -13,7 +13,9 @@ from transformers import pipeline
 # === CONFIGURARE ===
 
 sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device='cpu')
+import torch
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = embedding_model.to(torch.device("cpu"))
 
 # === FUNCȚII PRINCIPALE ===
 def analizeaza_sentimentul(text):
