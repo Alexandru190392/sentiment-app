@@ -12,7 +12,7 @@ from transformers import pipeline
 
 # === CONFIGURARE ===
 
-sentiment_analyzer = pipeline("sentiment-analysis")
+sentiment_analyzer = pipeline("sentiment-analysis", device=-1)
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # === FUNCȚII PRINCIPALE ===
