@@ -119,7 +119,17 @@ def sterge_jurnal(user):
 
 # === INTERFAȚĂ ===
 
-st.title("🔍 ReflectAI – Varianta Personalizată DEMO")
+st.title("🔐 ReflectAI – Jurnal Emoțional Personalizat")
+
+utilizator = st.text_input("👤 Nume utilizator")
+parola = st.text_input("🔑 Parolă", type="password")
+
+autentificat = False
+if utilizator and parola:
+    if verifica_utilizator(utilizator, parola):
+        autentificat = True
+    else:
+        st.error("❌ Numele există deja, dar parola este greșită.")
 
 st.header("📓 Emotional Journal – Reflect and Grow")
 with st.form("journal_form"):
