@@ -45,12 +45,18 @@ def adauga_feedback(feedback):
         f.write(f"{datetime.now().isoformat()} - {feedback}\n")
 
 def salveaza_intrare_jurnal(text, rezultat, tema=None):
-    data = {"text": text.strip(), "result": rezultat, "timestamp": datetime.now().isoformat()}
-    if tema:
-        data["tema"] = tema
-    with open("journal_entries.json", "a", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False)
-        f.write("\n")
+    try:
+        data = {
+            "text": text.strip(),
+            "result": rezultat,
+            "timestamp": datetime.now().isoformat()
+        }
+        if tema:
+            data["tema"] = tema
+        with open("journal_entries.json", "a", encoding="utf-8") as f:
+            f.write(json.dumps(data, ensure_ascii=False) + "\n")
+    except Exception as e:
+        st.error(f"❌ Eroare la salvarea jurnalului: {e}")
 
 # === GRAFIC + REZUMAT ===
 def afiseaza_grafic_sentimente():
