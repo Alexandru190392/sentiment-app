@@ -67,14 +67,13 @@ elif pagina == "Autentificare":
             st.session_state.utilizator = nume
         else:
             st.error(mesaj)
-            import time
 
 # După autentificare cu succes, redirecționează
 if "utilizator" in st.session_state and st.session_state.get("redirectat", False) is False:
     st.session_state["redirectat"] = True
     with st.spinner("Te conectezi la aplicație..."):
         time.sleep(1)  # mică pauză pentru UX
-   switch_page("2_Jurnal_Emotional") # ← Schimbă aici în funcție de numele fișierului din /pages/
+        switch_page("2_Jurnal_Emotional")  # ← AICI era problema: trebuia indentat
 
 # === Status sesiune ===
 if "utilizator" in st.session_state:
