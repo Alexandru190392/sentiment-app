@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
+st.set_page_config(page_title="ReflectAI", page_icon="🧠", layout="centered")
 
 # === Verificare sesiune utilizator ===
 if "utilizator" not in st.session_state:
