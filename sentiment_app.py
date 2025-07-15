@@ -131,7 +131,8 @@ with st.form("journal_form"):
 if submit and jurnal_text.strip():
     rezultat = analiza_ai(jurnal_text) if metoda == "AI (HuggingFace)" else analiza_simpla(jurnal_text)
     salveaza_intrare_jurnal(jurnal_text, rezultat, tema)
-    st.success(f"✅ Jurnal salvat — {rezultat[0]['label']} ({rezultat[0]['score']:.4f})")
+    st.success(f"✅ Etichetă: {rezultat[0]['label']} — Scor: {rezultat[0]['score']:.4f}")
+    st.info("📝 Intrarea ta a fost salvată cu succes!")
 
 if st.button("🧠 Generează Rezumat Emoțional"):
     genereaza_rezumat_emotional()
