@@ -5,6 +5,33 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
+import hashlib
+
+def hash_parola(parola):
+    return hashlib.sha256(parola.encode()).hexdigest()
+
+def verifica_utilizator(nume, parola):
+    if not os.path.exists("users.json"):
+        return True  # nu există utilizatori încă
+
+    with open("users.json", "r", encoding="utf-8") as f:
+        try:
+            users = json.load(f)
+        except:
+            users = {}
+
+    nume = nume.strip().lower().replace(" ", "_")
+    parola_hash = hash_parola(parola)
+
+    if nume in users:
+        return users[nume] == parola_hash
+    else:
+        # utilizator nou -> salvăm parola
+        users[nume] = parola_hash
+        with open("users.json", "w", encoding="utf-8") as f_out:
+            json.dump(users, f_out, ensure_ascii=False, indent=2)
+        return True
+
 
 # === FUNCȚII ===
 
