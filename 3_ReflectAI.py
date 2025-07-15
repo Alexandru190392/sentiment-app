@@ -94,7 +94,7 @@ def sterge_jurnal():
 
 # === INTERFAȚĂ ===
 
-st.title("📓 ReflectAI – Jurnalul Tău Emoțional")
+st.title("🧠 ReflectAI - Jurnal Emoțional")
 
 with st.form("journal_form"):
     tema = st.text_input("📝 Tema zilei (opțional)")
