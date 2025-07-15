@@ -1,4 +1,4 @@
-# sentiment_app.py - aplicația principală ReflectAI
+# ReflectAI - aplicația principală
 
 import os
 import json
