@@ -65,6 +65,14 @@ elif pagina == "Autentificare":
             st.session_state.utilizator = nume
         else:
             st.error(mesaj)
+            import time
+
+# După autentificare cu succes, redirecționează
+if "utilizator" in st.session_state and st.session_state.get("redirectat", False) is False:
+    st.session_state["redirectat"] = True
+    with st.spinner("Te conectezi la aplicație..."):
+        time.sleep(1)  # mică pauză pentru UX
+    st.switch_page("ReflectAI_app.py")  # redirecționează către pagina principală
 
 # === Status sesiune ===
 if "utilizator" in st.session_state:
