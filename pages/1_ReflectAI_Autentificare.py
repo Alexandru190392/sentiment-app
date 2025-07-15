@@ -1,4 +1,5 @@
-from streamlit_extras.switch_page_button import switch_page
+st.experimental_set_query_params(page="2_Jurnal_Emotional")
+st.rerun()
 import time
 import streamlit as st
 import json
