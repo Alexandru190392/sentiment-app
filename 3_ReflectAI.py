@@ -7,8 +7,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
-from transformers import pipeline
-summarizer = pipeline("summarization")
 
 # === Verificare sesiune utilizator ===
 if "utilizator" not in st.session_state:
