@@ -136,3 +136,6 @@ if submit and jurnal_text.strip():
 
 if st.button("🧠 Generează Rezumat Emoțional"):
     genereaza_rezumat_emotional()
+    if st.button("🗑️ Șterge toate intrările din jurnal (DEMO)"):
+    open("journal_entries.json", "w", encoding="utf-8").close()
+    st.warning("⚠️ Toate intrările din jurnal au fost șterse!")
