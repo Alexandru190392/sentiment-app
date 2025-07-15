@@ -6,9 +6,26 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import re
 
-# === FUNCȚII ===
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+import torch
 
-def analizeaza_sentimentul(text):
+# === MODEL AI HuggingFace ===
+@st.cache_resource
+def load_ai_model():
+    tokenizer = AutoTokenizer.from_pretrained("dumitrescustefan/bert-base-romanian-uncased-v1")
+    model = AutoModelForSequenceClassification.from_pretrained("dumitrescustefan/bert-base-romanian-uncased-v1")
+    return pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
+
+# === FUNCȚIE AI ===
+def analiza_ai(text):
+    pipe = load_ai_model()
+    rezultat = pipe(text)[0]
+    label = rezultat['label']
+    score = round(rezultat['score'], 2)
+    return [{"label": label, "score": score}]
+
+# === FUNCȚIE SIMPLĂ ===
+def analiza_simpla(text):
     pozitive = ["bine", "fericit", "iubesc", "mândru", "curajos", "clar", "entuziasm", "excelent", "plăcut"]
     negative = ["trist", "obosit", "urăsc", "supărat", "dezamăgit", "confuz", "rău", "singur"]
     text = text.lower()
@@ -16,6 +33,7 @@ def analizeaza_sentimentul(text):
     label = "Pozitiv" if score > 0 else "Negativ" if score < 0 else "Neutru"
     return [{"label": label, "score": round(abs(score) / max(1, len(text.split())), 2)}]
 
+# === SALVARE ===
 def salveaza_rezultatul(text, result):
     data = {"text": text.strip(), "result": result, "timestamp": datetime.now().isoformat()}
     with open("result.json", "a", encoding="utf-8") as f:
@@ -34,6 +52,7 @@ def salveaza_intrare_jurnal(text, rezultat, tema=None):
         json.dump(data, f, ensure_ascii=False)
         f.write("\n")
 
+# === GRAFIC + REZUMAT ===
 def afiseaza_grafic_sentimente():
     try:
         with open("result.json", "r", encoding="utf-8") as f:
@@ -72,15 +91,23 @@ def genereaza_rezumat_emotional():
         st.error(f"Eroare la rezumat: {e}")
 
 # === INTERFAȚĂ ===
-st.title("🔍 ReflectAI - Varianta DEMO (Rapidă și Offline)")
+st.title("🧠 ReflectAI – Cu AI & Offline")
+
+# Alegere metodă de analiză
+metoda = st.radio("🔍 Alege metoda de analiză", ["Simplă (offline)", "AI (HuggingFace)"])
 
 if st.button("📈 Vezi graficul cu evoluția sentimentelor"):
     afiseaza_grafic_sentimente()
 
 text_input = st.text_area("✏️ Introdu textul pentru analiză:")
+
 if st.button("🔍 Analizează"):
     if text_input:
-        rezultat = analizeaza_sentimentul(text_input)
+        if metoda == "AI (HuggingFace)":
+            rezultat = analiza_ai(text_input)
+        else:
+            rezultat = analiza_simpla(text_input)
+
         st.success(f"Etichetă: {rezultat[0]['label']} — Scor: {rezultat[0]['score']:.4f}")
         salveaza_rezultatul(text_input, rezultat)
         feedback = st.radio("📊 A fost analiza utilă?", ["Da", "Nu"])
@@ -96,7 +123,7 @@ with st.form("journal_form"):
     jurnal_text = st.text_area("Scrie ce simți:", height=300)
     submit = st.form_submit_button("📝 Salvează jurnal")
 if submit and jurnal_text.strip():
-    rezultat = analizeaza_sentimentul(jurnal_text)
+    rezultat = analiza_ai(jurnal_text) if metoda == "AI (HuggingFace)" else analiza_simpla(jurnal_text)
     salveaza_intrare_jurnal(jurnal_text, rezultat, tema)
     st.success(f"✅ Jurnal salvat — {rezultat[0]['label']} ({rezultat[0]['score']:.4f})")
 
