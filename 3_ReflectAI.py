@@ -1,4 +1,4 @@
-# ReflectAI - aplicația principală
+# 3_ReflectAI.py - aplicația principală ReflectAI
 
 import os
 import json
