@@ -1,3 +1,5 @@
+# sentiment_app.py - aplicația principală ReflectAI
+
 import os
 import json
 import streamlit as st
@@ -5,33 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import re
-import hashlib
 
-def hash_parola(parola):
-    return hashlib.sha256(parola.encode()).hexdigest()
+# === Verificare sesiune utilizator ===
+if "utilizator" not in st.session_state:
+    st.warning("🔐 Te rugăm să te autentifici din pagina de 'Autentificare'.")
+    st.stop()
 
-def verifica_utilizator(nume, parola):
-    if not os.path.exists("users.json"):
-        return True  # nu există utilizatori încă
-
-    with open("users.json", "r", encoding="utf-8") as f:
-        try:
-            users = json.load(f)
-        except:
-            users = {}
-
-    nume = nume.strip().lower().replace(" ", "_")
-    parola_hash = hash_parola(parola)
-
-    if nume in users:
-        return users[nume] == parola_hash
-    else:
-        # utilizator nou -> salvăm parola
-        users[nume] = parola_hash
-        with open("users.json", "w", encoding="utf-8") as f_out:
-            json.dump(users, f_out, ensure_ascii=False, indent=2)
-        return True
-
+utilizator = st.session_state.utilizator
 
 # === FUNCȚII ===
 
@@ -53,16 +35,9 @@ def adauga_feedback(feedback):
     with open("feedback.txt", "a", encoding="utf-8") as f:
         f.write(f"{datetime.now().isoformat()} - {feedback}\n")
 
-def salveaza_intrare_jurnal_personalizat(user, text, rezultat, tema=None):
-    if not user.strip():
-        st.error("⚠️ Trebuie să introduci un nume de utilizator!")
-        return
-    nume_fisier = f"journal_{user.strip().lower().replace(' ', '_')}.json"
-    data = {
-        "text": text.strip(),
-        "result": rezultat,
-        "timestamp": datetime.now().isoformat()
-    }
+def salveaza_intrare_jurnal(text, rezultat, tema=None):
+    nume_fisier = f"journal_{utilizator.lower().replace(' ', '_')}.json"
+    data = {"text": text.strip(), "result": rezultat, "timestamp": datetime.now().isoformat()}
     if tema:
         data["tema"] = tema
     with open(nume_fisier, "a", encoding="utf-8") as f:
@@ -70,8 +45,8 @@ def salveaza_intrare_jurnal_personalizat(user, text, rezultat, tema=None):
         f.write("\n")
     st.success("✅ Intrarea ta a fost salvată cu succes!")
 
-def genereaza_rezumat_emotional(user):
-    nume_fisier = f"journal_{user.strip().lower().replace(' ', '_')}.json"
+def genereaza_rezumat_emotional():
+    nume_fisier = f"journal_{utilizator.lower().replace(' ', '_')}.json"
     try:
         if not os.path.exists(nume_fisier):
             st.warning("Nu există date pentru acest utilizator.")
@@ -86,8 +61,8 @@ def genereaza_rezumat_emotional(user):
     except Exception as e:
         st.error(f"Eroare la rezumat: {e}")
 
-def afiseaza_grafic_sentimente(user):
-    nume_fisier = f"journal_{user.strip().lower().replace(' ', '_')}.json"
+def afiseaza_grafic_sentimente():
+    nume_fisier = f"journal_{utilizator.lower().replace(' ', '_')}.json"
     try:
         with open(nume_fisier, "r", encoding="utf-8") as f:
             data = [json.loads(line) for line in f]
@@ -109,8 +84,8 @@ def afiseaza_grafic_sentimente(user):
     except Exception as e:
         st.warning(f"Eroare la încărcarea datelor: {e}")
 
-def sterge_jurnal(user):
-    nume_fisier = f"journal_{user.strip().lower().replace(' ', '_')}.json"
+def sterge_jurnal():
+    nume_fisier = f"journal_{utilizator.lower().replace(' ', '_')}.json"
     if os.path.exists(nume_fisier):
         open(nume_fisier, "w", encoding="utf-8").close()
         st.warning("⚠️ Jurnalul a fost șters complet.")
@@ -119,46 +94,29 @@ def sterge_jurnal(user):
 
 # === INTERFAȚĂ ===
 
-st.title("🔐 ReflectAI – Jurnal Emoțional Personalizat")
+st.title("📓 ReflectAI – Jurnalul Tău Emoțional")
 
-utilizator = st.text_input("👤 Nume utilizator")
-parola = st.text_input("🔑 Parolă", type="password")
-
-autentificat = False
-if utilizator and parola:
-    if verifica_utilizator(utilizator, parola):
-        autentificat = True
-    else:
-        st.error("❌ Numele există deja, dar parola este greșită.")
-
-st.header("📓 Emotional Journal – Reflect and Grow")
 with st.form("journal_form"):
-    utilizator = st.text_input("👤 Nume utilizator (obligatoriu pentru jurnal)")
     tema = st.text_input("📝 Tema zilei (opțional)")
     jurnal_text = st.text_area("✏️ Scrie ce simți:", height=300)
     submit = st.form_submit_button("📝 Salvează jurnal")
 
 if submit and jurnal_text.strip():
     rezultat = analizeaza_sentimentul(jurnal_text)
-    salveaza_intrare_jurnal_personalizat(utilizator, jurnal_text, rezultat, tema)
+    salveaza_intrare_jurnal(jurnal_text, rezultat, tema)
 
-# === Rezumat & Vizualizare ===
+st.subheader("📊 Acțiuni pentru jurnalul tău")
+if st.button("🧠 Generează Rezumat Emoțional"):
+    genereaza_rezumat_emotional()
 
-st.subheader("📈 Analizează Jurnalul Tău")
-if utilizator.strip():
-    if st.button("🧠 Generează Rezumat Emoțional"):
-        genereaza_rezumat_emotional(utilizator)
+if st.button("📈 Vezi graficul cu evoluția sentimentelor"):
+    afiseaza_grafic_sentimente()
 
-    if st.button("📊 Vezi graficul cu evoluția sentimentelor"):
-        afiseaza_grafic_sentimente(utilizator)
-
-    if st.button("🗑️ Șterge toate intrările din jurnal"):
-        sterge_jurnal(utilizator)
-
-# === Analiză individuală ===
+if st.button("🗑️ Șterge toate intrările din jurnal"):
+    sterge_jurnal()
 
 st.header("💬 Analiză Rapidă Sentiment Text")
-text_input = st.text_area("✏️ Introdu textul pentru analiză:")
+text_input = st.text_area("✏️ Introdu textul pentru analiză rapidă:")
 if st.button("🔍 Analizează"):
     if text_input:
         rezultat = analizeaza_sentimentul(text_input)
