@@ -1,5 +1,3 @@
-st.experimental_set_query_params(page="2_Jurnal_Emotional")
-st.rerun()
 import time
 import streamlit as st
 import json
@@ -66,15 +64,10 @@ elif pagina == "Autentificare":
         if succes:
             st.success(mesaj)
             st.session_state.utilizator = nume
+            st.experimental_set_query_params(page="2_Jurnal_Emotional")
+            st.rerun()
         else:
             st.error(mesaj)
-
-# După autentificare cu succes, redirecționează
-if "utilizator" in st.session_state and st.session_state.get("redirectat", False) is False:
-    st.session_state["redirectat"] = True
-    with st.spinner("Te conectezi la aplicație..."):
-        time.sleep(1)  # mică pauză pentru UX
-        switch_page("2_Jurnal_Emotional")  # ← AICI era problema: trebuia indentat
 
 # === Status sesiune ===
 if "utilizator" in st.session_state:
