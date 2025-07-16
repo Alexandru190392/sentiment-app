@@ -37,12 +37,14 @@ st.markdown("""
             color: #555;
         }
         .journal-box {
-            background-color: white;
-            padding: 2em;
-            border-radius: 15px;
-            max-width: 700px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    background-color: white;
+    padding: 1.5em;
+    border-radius: 12px;
+    width: 100%;
+    box-shadow: 0 0 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
         }
         .result-box {
             background-color: #EAF5EA;
