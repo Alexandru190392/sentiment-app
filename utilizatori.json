@@ -1,1 +1,24 @@
-{}
+utilizatori_path = "utilizatori.json"
+
+# Creează fișierul dacă nu există sau e gol
+if not os.path.exists(utilizatori_path) or os.path.getsize(utilizatori_path) == 0:
+    default_users = {
+        "alexandru": {
+            "parola": "parolamea"
+        }
+    }
+    with open(utilizatori_path, "w", encoding="utf-8") as f:
+        json.dump(default_users, f, indent=2, ensure_ascii=False)
+
+# Încarcă fișierul
+with open(utilizatori_path, "r", encoding="utf-8") as f:
+    users = json.load(f)
+
+# Dacă fișierul este invalid sau fără utilizatori, oprește aplicația
+if not users or not isinstance(users, dict):
+    st.error("⚠️ Fișierul 'utilizatori.json' este gol sau corupt. Te rog adaugă cel puțin un utilizator.")
+    st.stop()
+
+# Selectează utilizatorul implicit (primul din fișier)
+current_user = list(users.keys())[0]
+user_file = f"jurnale/{current_user}_journal.json"
