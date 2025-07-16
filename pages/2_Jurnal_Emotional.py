@@ -18,7 +18,7 @@ quotes = [
     "Scrisul zilnic e exercițiul tău de sănătate emoțională.",
 ]
 
-# Stil CSS ReflectAI
+# Stil CSS
 st.markdown("""
     <style>
         .stApp { background-color: #F6F8FC; }
@@ -59,7 +59,7 @@ st.markdown("<h1>📘 Jurnal Emoțional</h1>", unsafe_allow_html=True)
 st.markdown('<p class="intro">Scrie ce simți. Reflectă. Află ce emoții trăiești.</p>', unsafe_allow_html=True)
 st.info(f"💬 {random.choice(quotes)}")
 
-# Load utilizator (exemplu simplu)
+# Load utilizator
 with open("utilizatori.json", "r", encoding="utf-8") as f:
     users = json.load(f)
 
@@ -67,23 +67,35 @@ current_user = list(users.keys())[0]
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
-# Formular
-with st.form("jurnal_form"):
+# Caseta albă reală (design)
+with st.container():
     st.markdown('<div class="journal-box">', unsafe_allow_html=True)
+
     titlu_zi = st.text_input("🗓️ Titlul zilei")
     text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
-    analiza_btn = st.form_submit_button("🔍 Analizează")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Butoane de acțiune
-col1, col2 = st.columns([1, 1])
+# Butoane acțiune
+col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
-    save_journal = st.button("💾 Salvează jurnalul")
+    analiza_btn = st.button("🔍 Analizează")
 with col2:
-    delete_history = st.button("🗑️ Șterge istoricul", type="primary")
+    save_btn = st.button("💾 Salvează jurnalul")
+with col3:
+    delete_btn = st.button("🗑️ Șterge istoricul")
 
-# Salvare
-if save_journal and text_input.strip():
+# Acțiuni
+if analiza_btn:
+    word_count = len(text_input.split())
+    st.markdown(f"""
+        <div class="result-box">
+            🔍 Ai scris <b>{word_count} cuvinte</b> azi. Fiecare cuvânt te apropie mai mult de tine.
+            <br><br><b>Continuă!</b> Reflecția zilnică este cheia emoțională a maturității.
+        </div>
+    """, unsafe_allow_html=True)
+
+if save_btn and text_input.strip():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = {"data": now, "titlu": titlu_zi, "continut": text_input}
 
@@ -104,10 +116,9 @@ if save_journal and text_input.strip():
         </div>
     """, unsafe_allow_html=True)
 
-# Ștergere
-if delete_history:
+if delete_btn:
     if os.path.exists(user_file):
         os.remove(user_file)
-        st.success("🧹 Istoricul jurnalului a fost șters!")
+        st.success("🧹 Istoricul jurnalului a fost șters complet.")
     else:
-        st.warning("⚠️ Nu există jurnal salvat pentru a fi șters.")
+        st.warning("⚠️ Nu există jurnal salvat.")
