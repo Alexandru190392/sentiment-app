@@ -92,24 +92,43 @@ def sterge_jurnal():
 
 # === INTERFAȚĂ ===
 
-st.title("📓 ReflectAI - Jurnalul Meu Emoțional")
+optiune = st.radio("Alege secțiunea:", ["📝 Scrie în jurnal", "🤖 ReflectAI"])
 
-with st.form("journal_form"):
-    tema = st.text_input("📝 Tema zilei (opțional)")
-    jurnal_text = st.text_area("✏️ Scrie ce simți:", height=300)
-    submit = st.form_submit_button("📝 Salvează jurnal")
+if optiune == "📝 Scrie în jurnal":
+    st.title("📓 ReflectAI - Jurnalul Meu Emoțional")
 
-if submit and jurnal_text.strip():
-    rezultat = analizeaza_sentimentul(jurnal_text)
-    salveaza_intrare_jurnal(jurnal_text, rezultat, tema)
+    with st.form("journal_form"):
+        tema = st.text_input("📝 Tema zilei (opțional)")
+        jurnal_text = st.text_area("✏️ Scrie ce simți:", height=300)
+        submit = st.form_submit_button("📝 Salvează jurnal")
 
-st.subheader("📊 Acțiuni pentru jurnalul tău")
+    if submit and jurnal_text.strip():
+        rezultat = analizeaza_sentimentul(jurnal_text)
+        salveaza_intrare_jurnal(jurnal_text, rezultat, tema)
 
-if st.button("🧠 Generează Rezumat Emoțional"):
-    genereaza_rezumat_emotional()
+    st.subheader("📊 Acțiuni pentru jurnalul tău")
 
-if st.button("📈 Vezi graficul cu evoluția sentimentelor"):
-    afiseaza_grafic_sentimente()
+    if st.button("🧠 Generează Rezumat Emoțional"):
+        genereaza_rezumat_emotional()
 
-if st.button("🗑️ Șterge toate intrările din jurnal"):
-    sterge_jurnal()
+    if st.button("📈 Vezi graficul cu evoluția sentimentelor"):
+        afiseaza_grafic_sentimente()
+
+    if st.button("🗑️ Șterge toate intrările din jurnal"):
+        sterge_jurnal()
+
+elif optiune == "🤖 ReflectAI":
+    st.title("🤖 ReflectAI - Analiza Textului Emoțional")
+    text_input = st.text_area("Introdu un text pentru analiză:")
+    if st.button("🔍 Analizează"):
+        if text_input.strip():
+            rezultat = analizeaza_sentimentul(text_input)
+            salveaza_rezultatul(text_input, rezultat)
+            st.write("Etichetă:", rezultat[0]["label"])
+            st.write("Scor:", rezultat[0]["score"])
+            feedback = st.text_input("Ai feedback legat de analiză?")
+            if feedback:
+                adauga_feedback(feedback)
+                st.success("🙏 Mulțumim pentru feedback!")
+        else:
+            st.warning("⚠️ Introdu un text pentru a fi analizat.")
