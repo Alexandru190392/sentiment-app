@@ -1,10 +1,11 @@
+
 import streamlit as st
 from datetime import datetime
 import json
 import random
 import os
 
-# Citate despre jurnal
+# === Citate despre jurnal ===
 quotes = [
     "Un jurnal nu e doar despre trecut – e despre viitorul tău emoțional.",
     "Scrisul e oglinda sufletului tău în fiecare zi.",
@@ -18,12 +19,10 @@ quotes = [
     "Scrisul zilnic e exercițiul tău de sănătate emoțională.",
 ]
 
-# Stil CSS
+# === CSS Design ===
 st.markdown("""
     <style>
-        .stApp {
-            background-color: #F6F8FC;
-        }
+        .stApp { background-color: #F6F8FC; }
         h1 {
             color: #5A4FCF;
             font-size: 2.8em;
@@ -54,29 +53,44 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titlu și citat
+# === Titlu și citat ===
 st.markdown("<h1>📘 Jurnal Emoțional</h1>", unsafe_allow_html=True)
 st.markdown('<p class="intro">Scrie ce simți. Reflectă. Află ce emoții trăiești.</p>', unsafe_allow_html=True)
 st.info(f"💬 {random.choice(quotes)}")
 
-# Load utilizator
-with open("utilizatori.json", "r", encoding="utf-8") as f:
-    users = json.load(f)
+# === Inițializare utilizator ===
+utilizatori_path = "utilizatori.json"
+if not os.path.exists(utilizatori_path) or os.path.getsize(utilizatori_path) == 0:
+    default_users = { "alexandru": { "parola": "parolamea" } }
+    with open(utilizatori_path, "w", encoding="utf-8") as f:
+        json.dump(default_users, f, indent=2, ensure_ascii=False)
+
+try:
+    with open(utilizatori_path, "r", encoding="utf-8") as f:
+        continut = f.read().strip()
+        if not continut:
+            raise ValueError("Fișier gol")
+        users = json.loads(continut)
+except Exception:
+    st.error("⚠️ Fișierul 'utilizatori.json' este gol, invalid sau corupt. Te rog adaugă cel puțin un utilizator.")
+    st.stop()
+
+if not users or not isinstance(users, dict):
+    st.error("⚠️ Fișierul 'utilizatori.json' nu conține un dicționar de utilizatori.")
+    st.stop()
 
 current_user = list(users.keys())[0]
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
-# Caseta albă reală (design)
+# === Cutie de jurnal ===
 with st.container():
     st.markdown('<div class="journal-box">', unsafe_allow_html=True)
-
     titlu_zi = st.text_input("🗓️ Titlul zilei")
     text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
-
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Butoane acțiune
+# === Butoane de acțiune ===
 col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
     analiza_btn = st.button("🔍 Analizează")
@@ -85,7 +99,7 @@ with col2:
 with col3:
     delete_btn = st.button("🗑️ Șterge istoricul")
 
-# Acțiuni
+# === Acțiune Analiză ===
 if analiza_btn:
     word_count = len(text_input.split())
     st.markdown(f"""
@@ -95,9 +109,10 @@ if analiza_btn:
         </div>
     """, unsafe_allow_html=True)
 
+# === Acțiune Salvare ===
 if save_btn and text_input.strip():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    entry = {"data": now, "titlu": titlu_zi, "continut": text_input}
+    entry = { "data": now, "titlu": titlu_zi, "continut": text_input }
 
     if os.path.exists(user_file):
         with open(user_file, "r", encoding="utf-8") as f:
@@ -116,6 +131,7 @@ if save_btn and text_input.strip():
         </div>
     """, unsafe_allow_html=True)
 
+# === Acțiune Ștergere ===
 if delete_btn:
     if os.path.exists(user_file):
         os.remove(user_file)
