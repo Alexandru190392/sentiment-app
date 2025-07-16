@@ -16,15 +16,12 @@ quotes = [
     "În jurnal, nu există greșeli, doar revelații.",
     "Uneori, hârtia te înțelege mai bine decât oamenii.",
     "Scrisul zilnic e exercițiul tău de sănătate emoțională.",
-    # Poți adăuga mai multe aici...
 ]
 
 # Stil CSS ReflectAI
 st.markdown("""
     <style>
-        .stApp {
-            background-color: #F6F8FC;
-        }
+        .stApp { background-color: #F6F8FC; }
         h1 {
             color: #5A4FCF;
             font-size: 2.8em;
@@ -37,14 +34,14 @@ st.markdown("""
             color: #555;
         }
         .journal-box {
-    background-color: white;
-    padding: 1.5em;
-    border-radius: 12px;
-    width: 100%;
-    box-shadow: 0 0 6px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
+            background-color: white;
+            padding: 1.5em;
+            border-radius: 12px;
+            width: 100%;
+            box-shadow: 0 0 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
         }
         .result-box {
             background-color: #EAF5EA;
@@ -57,50 +54,45 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titlu principal
+# Titlu și citat
 st.markdown("<h1>📘 Jurnal Emoțional</h1>", unsafe_allow_html=True)
 st.markdown('<p class="intro">Scrie ce simți. Reflectă. Află ce emoții trăiești.</p>', unsafe_allow_html=True)
-
-# Citat aleatoriu
 st.info(f"💬 {random.choice(quotes)}")
 
 # Load utilizator (exemplu simplu)
 with open("utilizatori.json", "r", encoding="utf-8") as f:
     users = json.load(f)
 
-# Selectează utilizatorul activ (aici alegem primul pentru demo)
 current_user = list(users.keys())[0]
 user_file = f"jurnale/{current_user}_journal.json"
-
-# Creează folder dacă nu există
 os.makedirs("jurnale", exist_ok=True)
 
-# Form jurnal
+# Formular
 with st.form("jurnal_form"):
-    with st.container():
-        titlu_zi = st.text_input("🗓️ Titlul zilei")
-        text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
-        submitted = st.form_submit_button("🔍 Analizează")
+    st.markdown('<div class="journal-box">', unsafe_allow_html=True)
+    titlu_zi = st.text_input("🗓️ Titlul zilei")
+    text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
+    analiza_btn = st.form_submit_button("🔍 Analizează")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+# Butoane de acțiune
+col1, col2 = st.columns([1, 1])
+with col1:
+    save_journal = st.button("💾 Salvează jurnalul")
+with col2:
+    delete_history = st.button("🗑️ Șterge istoricul", type="primary")
 
-# Acțiune la trimitere
-if submitted and text_input.strip():
+# Salvare
+if save_journal and text_input.strip():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    entry = {
-        "data": now,
-        "titlu": titlu_zi,
-        "continut": text_input
-    }
+    entry = {"data": now, "titlu": titlu_zi, "continut": text_input}
 
-    # Încarcă jurnal existent
     if os.path.exists(user_file):
         with open(user_file, "r", encoding="utf-8") as f:
             jurnal = json.load(f)
     else:
         jurnal = []
 
-    # Adaugă în jurnal și salvează
     jurnal.append(entry)
     with open(user_file, "w", encoding="utf-8") as f:
         json.dump(jurnal, f, indent=2, ensure_ascii=False)
@@ -111,3 +103,11 @@ if submitted and text_input.strip():
             <br><br><b>Felicitări!</b> Fiecare zi e diferită. Azi ai ales să fii prezent.
         </div>
     """, unsafe_allow_html=True)
+
+# Ștergere
+if delete_history:
+    if os.path.exists(user_file):
+        os.remove(user_file)
+        st.success("🧹 Istoricul jurnalului a fost șters!")
+    else:
+        st.warning("⚠️ Nu există jurnal salvat pentru a fi șters.")
