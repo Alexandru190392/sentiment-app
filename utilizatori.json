@@ -1,6 +1,10 @@
+import streamlit as st
+import os
+import json
+
 utilizatori_path = "utilizatori.json"
 
-# Creează fișierul dacă nu există sau e gol
+# ✅ Creează fișierul dacă nu există sau e gol
 if not os.path.exists(utilizatori_path) or os.path.getsize(utilizatori_path) == 0:
     default_users = {
         "alexandru": {
@@ -10,15 +14,28 @@ if not os.path.exists(utilizatori_path) or os.path.getsize(utilizatori_path) == 
     with open(utilizatori_path, "w", encoding="utf-8") as f:
         json.dump(default_users, f, indent=2, ensure_ascii=False)
 
-# Încarcă fișierul
+# ✅ Încarcă fișierul cu protecție la erori
 with open(utilizatori_path, "r", encoding="utf-8") as f:
-    users = json.load(f)
+    try:
+        continut = f.read().strip()
+        if not continut:
+            raise ValueError("Fișier gol")
+        users = json.loads(continut)
+    except Exception:
+        st.error("⚠️ Fișierul 'utilizatori.json' este gol, invalid sau corupt. Te rog adaugă cel puțin un utilizator.")
+        st.stop()
 
-# Dacă fișierul este invalid sau fără utilizatori, oprește aplicația
+# ✅ Verificare structură corectă
 if not users or not isinstance(users, dict):
-    st.error("⚠️ Fișierul 'utilizatori.json' este gol sau corupt. Te rog adaugă cel puțin un utilizator.")
+    st.error("⚠️ Fișierul 'utilizatori.json' nu conține un dicționar de utilizatori.")
     st.stop()
 
-# Selectează utilizatorul implicit (primul din fișier)
+# ✅ Selectează utilizatorul activ (primul din fișier)
 current_user = list(users.keys())[0]
 user_file = f"jurnale/{current_user}_journal.json"
+
+# ✅ Creează folderul pentru jurnale dacă nu există
+os.makedirs("jurnale", exist_ok=True)
+
+# (de aici poți continua cu jurnalul emoțional)
+st.success(f"✅ Utilizatorul activ este: **{current_user}**")
