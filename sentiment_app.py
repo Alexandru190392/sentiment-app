@@ -1,13 +1,9 @@
 import streamlit as st
+import time
 
-st.set_page_config(page_title="ReflectAI", page_icon="🧠", layout="centered")
+st.set_page_config(page_title="ReflectAI - Jurnalul Emoțional Inteligent", page_icon="🧠", layout="centered")
 
-if "utilizator" not in st.session_state:
-    st.warning("⚠️ Nu ești autentificat.")
-    if st.button("🔐 Autentifică-te aici"):
-        st.switch_page("pages/1_ReflectAI_Autentificare.py")
-    st.stop()
-
+# ✅ TITLU & PREZENTARE – mereu vizibil
 st.markdown("<h1 style='text-align: center; color: #5A4FCF;'>🧠 ReflectAI</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center;'>Jurnalul Emoțional Inteligent</h3>", unsafe_allow_html=True)
 st.divider()
@@ -22,13 +18,13 @@ ReflectAI este mai mult decât o aplicație – este oglinda ta interioară.
 🌱 Evoluează zi de zi.
 """)
 
-st.success(f"Bine ai revenit, **{st.session_state.utilizator}**! Te așteptăm în jurnalul tău.")
+st.divider()
 
-st.markdown("""
----
-
-### 🔍 Folosește meniul din stânga pentru a începe:
-- **📓 Jurnal Emoțional** – scrie și analizează
-- **🧠 ReflectAI** – vezi analiza pe text
-- **🔐 Autentificare** – schimbă utilizatorul
-""")
+# 🔄 Conținut diferit în funcție de autentificare:
+if "utilizator" in st.session_state:
+    st.success(f"Bine ai revenit, **{st.session_state.utilizator}**! Te așteptăm în jurnalul tău.")
+else:
+    st.warning("⚠️ Nu ești autentificat.")
+    st.markdown("👇 Apasă mai jos pentru a te conecta la jurnal:")
+    if st.button("🔐 Autentifică-te aici"):
+        st.switch_page("pages/1_ReflectAI_Autentificare.py")
