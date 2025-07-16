@@ -2,10 +2,9 @@ import streamlit as st
 
 st.set_page_config(page_title="ReflectAI", page_icon="🧠", layout="centered")
 
-st.title("🧠 ReflectAI App")
-st.markdown("Aplicația funcționează! ✅")
+if "utilizator" not in st.session_state:
+    st.info("🔐 Te rugăm să te autentifici din pagina de 'ReflectAI Autentificare'.")
+    st.stop()
 
-if "utilizator" in st.session_state:
-    st.success(f"Conectat ca: **{st.session_state.utilizator}**")
-else:
-    st.warning("🔐 Nu ești autentificat.")
+st.title("🧠 ReflectAI - Sentiment App")
+st.success(f"Bine ai venit, {st.session_state.utilizator}!")
