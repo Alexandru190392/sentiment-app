@@ -21,7 +21,9 @@ quotes = [
 # Stil CSS
 st.markdown("""
     <style>
-        .stApp { background-color: #F6F8FC; }
+        .stApp {
+            background-color: #F6F8FC;
+        }
         h1 {
             color: #5A4FCF;
             font-size: 2.8em;
@@ -37,11 +39,9 @@ st.markdown("""
             background-color: white;
             padding: 1.5em;
             border-radius: 12px;
-            width: 100%;
+            max-width: 700px;
+            margin: auto;
             box-shadow: 0 0 6px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
         }
         .result-box {
             background-color: #EAF5EA;
