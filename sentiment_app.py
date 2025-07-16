@@ -2,6 +2,8 @@ import streamlit as st
 import time
 
 st.set_page_config(page_title="ReflectAI - Jurnalul Emoțional Inteligent", page_icon="🧠", layout="centered")
+if "utilizator" not in st.session_state:
+    st.switch_page("pages/1_ReflectAI_Autentificare.py")
 
 # === Culori ===
 PRIMARY = "#5A4FCF"
