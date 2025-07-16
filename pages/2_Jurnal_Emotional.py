@@ -75,13 +75,14 @@ os.makedirs("jurnale", exist_ok=True)
 
 # Form jurnal
 with st.form("jurnal_form"):
-    st.markdown('<div class="journal-box">', unsafe_allow_html=True)
-    
-    titlu_zi = st.text_input("🗓️ Titlul zilei")
-    text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
-    submitted = st.form_submit_button("🔍 Analizează")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="journal-box">', unsafe_allow_html=True)
+        
+        titlu_zi = st.text_input("🗓️ Titlul zilei")
+        text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
+        submitted = st.form_submit_button("🔍 Analizează")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # Acțiune la trimitere
 if submitted and text_input.strip():
