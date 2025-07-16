@@ -78,8 +78,6 @@ os.makedirs("jurnale", exist_ok=True)
 # Form jurnal
 with st.form("jurnal_form"):
     with st.container():
-        st.markdown('<div class="journal-box">', unsafe_allow_html=True)
-        
         titlu_zi = st.text_input("🗓️ Titlul zilei")
         text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
         submitted = st.form_submit_button("🔍 Analizează")
