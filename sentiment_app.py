@@ -86,5 +86,4 @@ if "utilizator" in st.session_state:
 else:
     st.warning("⚠️ Nu ești autentificat.")
     st.markdown("👇 Apasă mai jos pentru a te conecta:")
-    if st.button("🔐 Autentifică-te aici"):
-        st.switch_page("pages/1_ReflectAI_Autentificare.py")
+    st.page_link("1_ReflectAI_Autentificare.py", label="🔐 Autentifică-te aici")
