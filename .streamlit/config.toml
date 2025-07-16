@@ -4,8 +4,5 @@ base = "light"
 [server]
 headless = true
 
-[client]
-showSidebarNavigation = false
-
 [browser]
 gatherUsageStats = false
