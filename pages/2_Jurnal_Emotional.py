@@ -45,12 +45,49 @@ st.markdown("""
 st.markdown("<h1>📘 Jurnal Emoțional</h1>", unsafe_allow_html=True)
 st.markdown('<p class="intro">Scrie ce simți. Reflectă. Află ce emoții trăiești.</p>', unsafe_allow_html=True)
 
-# Cutia de jurnal
+# Cutia de jurnal completă cu Titlul zilei
 with st.form("jurnal_form"):
     st.markdown('<div class="journal-box">', unsafe_allow_html=True)
+    titlu = st.text_input("📅 Titlul zilei")
     text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
     submitted = st.form_submit_button("🔍 Analizează")
     st.markdown('</div>', unsafe_allow_html=True)
+
+# Emoții simple
+pozitive = ["fericit", "recunoscător", "iubire", "mândru", "entuziasm", "calm", "liniște"]
+negative = ["trist", "supărat", "nervos", "confuz", "singur", "anxios", "obosit"]
+
+def analiza_text(text):
+    cuvinte = text.lower().split()
+    total = len(cuvinte)
+    poz = sum(c in pozitive for c in cuvinte)
+    neg = sum(c in negative for c in cuvinte)
+    poz_pct = round(poz / total * 100, 1) if total > 0 else 0
+    neg_pct = round(neg / total * 100, 1) if total > 0 else 0
+    return poz_pct, neg_pct, total
+
+# Afișare analiză și salvare
+if submitted and text_input.strip() != "":
+    poz_pct, neg_pct, total = analiza_text(text_input)
+
+    # Feedback personalizat
+    mesaj = "💪 Felicitări, faci progrese!" if poz_pct > 50 else "🌧️ Niciuna dintre zile nu e la fel. Continuă să scrii."
+    
+    # Afișare rezultat
+    st.markdown(f"""
+        <div class="result-box">
+            <b>Analiză:</b><br>
+            Total cuvinte: {total}<br>
+            Emoții pozitive: {poz_pct}%<br>
+            Emoții negative: {neg_pct}%<br><br>
+            {mesaj}
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Salvare jurnal
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    with open("jurnal_salvat.txt", "a", encoding="utf-8") as f:
+        f.write(f"[{now}] TITLU: {titlu}\n{text_input}\n\n")
 
 # Dacă a fost trimis jurnalul
 if submitted and text_input.strip() != "":
