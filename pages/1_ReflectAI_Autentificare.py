@@ -56,14 +56,12 @@ if pagina == "Crează cont":
     nume = st.text_input("👤 Nume utilizator")
     parola = st.text_input("🔒 Parolă", type="password")
     confirmare = st.text_input("🔒 Confirmă parola", type="password")
-       if st.button("🔓 Autentifică-te"):
-    succes, mesaj = autentificare(nume, parola)
-    if succes:
-        st.session_state.utilizator = nume
-        st.success(f"Bine ai revenit, **{nume}**! Jurnalul tău.")
-        st.rerun()
-    else:
-        st.error(mesaj)
+    if st.button("✅ Creează cont"):
+        succes, mesaj = creeaza_cont(nume, parola, confirmare)
+        if succes:
+            st.success(mesaj)
+        else:
+            st.error(mesaj)
 
 elif pagina == "Autentificare":
     st.subheader("🔑 Autentificare")
@@ -72,9 +70,9 @@ elif pagina == "Autentificare":
     if st.button("🔓 Autentifică-te"):
         succes, mesaj = autentificare(nume, parola)
         if succes:
-    st.session_state.utilizator = nume
-    st.success(f"Bine ai revenit, **{nume}**! Jurnalul tău.")
-    st.rerun()
+            st.session_state.utilizator = nume
+            st.success(f"Bine ai revenit, **{nume}**! Jurnalul tău.")
+            st.rerun()
         else:
             st.error(mesaj)
 
