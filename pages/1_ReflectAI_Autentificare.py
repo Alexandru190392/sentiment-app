@@ -4,14 +4,22 @@ import json
 import hashlib
 import os
 
-# === Fișierul în care sunt salvați utilizatorii ===
 USERS_FILE = "utilizatori.json"
 
 def incarca_utilizatori():
-    if not os.path.exists(USERS_FILE):
+    if not os.path.exists(USERS_FILE) or os.path.getsize(USERS_FILE) == 0:
         return {}
-    with open(USERS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            continut = f.read().strip()
+            if not continut:
+                return {}
+            utilizatori = json.loads(continut)
+            if not isinstance(utilizatori, dict):
+                return {}
+            return utilizatori
+    except Exception:
+        return {}
 
 def salveaza_utilizatori(utilizatori):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
