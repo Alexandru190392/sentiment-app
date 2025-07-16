@@ -58,7 +58,7 @@ st.markdown("<h1>🧠 ReflectAI</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Jurnalul Emoțional Inteligent</h3>", unsafe_allow_html=True)
 st.markdown("<div class='quote'>„În fiecare zi, purtăm cu noi gânduri nespuse, emoții neînțelese și dorința de a ne cunoaște mai bine.”</div>", unsafe_allow_html=True)
 
-# === Info box: prezentare generală ===
+# === Info box ===
 st.markdown("""
 <div class="info-box">
 <p><strong>ReflectAI</strong> este mai mult decât o aplicație – este oglinda ta interioară. Un spațiu sigur, profund și evolutiv unde:</p>
@@ -70,7 +70,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === Conținut condiționat ===
+# === Autentificare ===
 if "utilizator" in st.session_state:
     st.success(f"Bine ai revenit, **{st.session_state.utilizator}**! Te așteptăm în jurnalul tău.")
 else:
