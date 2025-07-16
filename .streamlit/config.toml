@@ -1,7 +1,11 @@
-[server]
-headless = true
-port = 8501
-enableCORS = false
-
 [theme]
 base = "light"
+
+[server]
+headless = true
+
+[client]
+showSidebarNavigation = false
+
+[browser]
+gatherUsageStats = false
