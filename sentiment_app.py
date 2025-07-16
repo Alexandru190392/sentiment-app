@@ -1,6 +1,7 @@
 import streamlit as st
 
-st.set_page_config(page_title="ReflectAI", page_icon="🧠")
+# Redirecționează spre pagina ReflectAI Autentificare
+st.switch_page("ReflectAI Autentificare")
 
 st.markdown("""
     <h1 style='text-align: center;'>🧠 ReflectAI</h1>
