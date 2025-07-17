@@ -81,6 +81,26 @@ if "utilizator" not in st.session_state:
     st.stop()
 
 current_user = st.session_state["utilizator"]
+# === Upload Avatar ===
+AVATAR_FOLDER = "avatars"
+os.makedirs(AVATAR_FOLDER, exist_ok=True)
+
+st.markdown("---")
+st.subheader("👤 Avatarul tău")
+
+avatar_path = os.path.join(AVATAR_FOLDER, f"{current_user}.jpg")
+
+# Afișăm avatarul curent dacă există
+if os.path.exists(avatar_path):
+    st.image(avatar_path, width=100, caption="Avatarul tău actual")
+
+# Upload nou
+uploaded_avatar = st.file_uploader("Încarcă o imagine (JPG/PNG)", type=["jpg", "jpeg", "png"])
+if uploaded_avatar is not None:
+    with open(avatar_path, "wb") as f:
+        f.write(uploaded_avatar.read())
+    st.success("✅ Avatar actualizat!")
+    st.image(avatar_path, width=100, caption="Avatarul tău nou")
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
