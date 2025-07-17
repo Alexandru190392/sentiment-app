@@ -71,10 +71,10 @@ elif pagina == "Autentificare":
     if st.button("🔓 Autentifică-te"):
         succes, mesaj = autentificare(nume, parola)
         if succes:
-    st.session_state["utilizator"] = nume
-    st.success(f"Bine ai revenit, **{nume}**! Mergi spre jurnalul tău.") 
-    time.sleep(1)
-    st.switch_page("pages/2_Jurnal_Emotional.py")
+            st.session_state["utilizator"] = nume
+            st.success(f"Bine ai revenit, **{nume}**! Mergi spre jurnalul tău.") 
+            time.sleep(1)
+            st.switch_page("pages/2_Jurnal_Emotional.py")
         else:
             st.error(mesaj)
 
