@@ -1,4 +1,3 @@
-from group_utils import load_grupuri, adauga_grup, trimite_cerere, aproba_cerere
 import streamlit as st
 import os
 import json
@@ -49,16 +48,12 @@ for fisier in fisiere:
 
         cuvinte_total = sum(len(entry["continut"].split()) for entry in entries)
         intrari_total = len(entries)
-
         zile = set(datetime.strptime(entry["data"], "%Y-%m-%d %H:%M").date() for entry in entries)
         zile_active = len(zile)
         medalie = calculeaza_medalie(zile_active)
 
         avatar_path = os.path.join(AVATAR_FOLDER, f"{username}.jpg")
-        if os.path.exists(avatar_path):
-            avatar_img = Image.open(avatar_path)
-        else:
-            avatar_img = None
+        avatar_img = Image.open(avatar_path) if os.path.exists(avatar_path) else None
 
         clasament.append({
             "avatar": avatar_img,
@@ -91,11 +86,8 @@ for i, persoana in enumerate(clasament):
 
     zile = persoana["zile_active"]
     praguri = [3, 7, 14, 30, 999]
-    niveluri_posibile = [p for p in praguri if zile >= p]
-    nivel_curent = max(niveluri_posibile) if niveluri_posibile else 0
-    praguri_viitoare = [p for p in praguri if p > zile]
-    prag_urmator = min(praguri_viitoare) if praguri_viitoare else nivel_curent + 1
-    progres_pct = int((zile / prag_urmator) * 100) if prag_urmator > 0 else 0
+    prag_urmator = next((p for p in praguri if p > zile), zile + 1)
+    progres_pct = int((zile / prag_urmator) * 100)
 
     badgeuri = []
     if persoana["cuvinte"] >= 1000:
@@ -127,10 +119,7 @@ for i, persoana in enumerate(clasament):
         with col4:
             st.markdown(f"🔥 {zile} zile")
         with col5:
-            st.markdown(
-                f"✍️ {persoana['cuvinte']} cuvinte<br>📘 {persoana['intrari']} intrări",
-                unsafe_allow_html=True
-            )
+            st.markdown(f"✍️ {persoana['cuvinte']} cuvinte<br>📘 {persoana['intrari']} intrări", unsafe_allow_html=True)
 
         st.progress(progres_pct, text=f"Progres către următoarea medalie: {zile}/{prag_urmator} zile")
 
