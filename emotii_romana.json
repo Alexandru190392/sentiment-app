@@ -1,0 +1,171 @@
+{
+  "Fericit": {
+    "Curios": [
+      "curios",
+      "interesat",
+      "cercetător",
+      "inquisitiv"
+    ],
+    "Încrezător": [
+      "încrezător",
+      "sigur",
+      "convingător",
+      "hotărât"
+    ],
+    "Mândru": [
+      "mândru",
+      "respectat",
+      "valorizat",
+      "apreciat"
+    ],
+    "Optimist": [
+      "optimist",
+      "încrezător în viitor",
+      "pozitiv",
+      "entuziasmat"
+    ],
+    "Iubit": [
+      "iubit",
+      "intim",
+      "apropiat",
+      "afectuos"
+    ],
+    "Mulțumit": [
+      "mulțumit",
+      "recunoscător",
+      "fericit",
+      "calm"
+    ]
+  },
+  "Trist": {
+    "Singur": [
+      "singur",
+      "abandonat",
+      "neînțeles"
+    ],
+    "Vulnerabil": [
+      "vulnerabil",
+      "rănit",
+      "slab",
+      "fragil"
+    ],
+    "Dezamagit": [
+      "dezamăgit",
+      "trist",
+      "îndurerat"
+    ],
+    "Rușinat": [
+      "rușinat",
+      "jenat",
+      "vinovat"
+    ],
+    "Depresiv": [
+      "depresiv",
+      "fără speranță",
+      "neputincios",
+      "gol"
+    ],
+    "Melancolic": [
+      "melancolic",
+      "apatic",
+      "lipsit de energie"
+    ]
+  },
+  "Furios": {
+    "Iritat": [
+      "iritat",
+      "enervat",
+      "deranjat"
+    ],
+    "Furios": [
+      "furios",
+      "nervos",
+      "agresiv",
+      "exploziv"
+    ],
+    "Gelos": [
+      "gelos",
+      "invidios"
+    ],
+    "Ofensat": [
+      "ofensat",
+      "umilit",
+      "jignit"
+    ],
+    "Frustrat": [
+      "frustrat",
+      "neînțeles",
+      "blocat"
+    ],
+    "Critic": [
+      "critic",
+      "judecător",
+      "nemulțumit"
+    ]
+  },
+  "Fricos": {
+    "Îngrijorat": [
+      "îngrijorat",
+      "temător",
+      "ansios"
+    ],
+    "Insecur": [
+      "nesigur",
+      "timid",
+      "slab"
+    ],
+    "Panicos": [
+      "panicat",
+      "speriat",
+      "terifiat"
+    ],
+    "Izolat": [
+      "izolat",
+      "exclus",
+      "neacceptat"
+    ],
+    "Stresat": [
+      "stresat",
+      "copleșit",
+      "presat"
+    ]
+  },
+  "Dezgustat": {
+    "Dezaprobat": [
+      "dezaprobat",
+      "dezamăgit",
+      "nemulțumit"
+    ],
+    "Respingător": [
+      "respins",
+      "revoltat",
+      "indignat"
+    ],
+    "Rușinat": [
+      "rușinat",
+      "dezgustat",
+      "jenat"
+    ],
+    "Judecător": [
+      "judecător",
+      "aspru",
+      "cinic"
+    ]
+  },
+  "Surprins": {
+    "Uimit": [
+      "uimit",
+      "șocat",
+      "surprins"
+    ],
+    "Confuz": [
+      "confuz",
+      "derutat"
+    ],
+    "Curios": [
+      "curios",
+      "interesat",
+      "mirat"
+    ]
+  }
+}
