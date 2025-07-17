@@ -49,7 +49,8 @@ def autentificare(nume, parola):
 # === UI ===
 st.set_page_config(page_title="ReflectAI Autentificare", page_icon="🔐")
 
-pagina = st.sidebar.radio("🔑 Alege acțiunea:", ["Crează cont", "Autentificare"])
+pagina = st.session_state.get("pagina_start", "Crează cont")
+pagina = st.sidebar.radio("🔑 Alege acțiunea:", ["Crează cont", "Autentificare"], index=0 if pagina == "Crează cont" else 1)
 
 if pagina == "Crează cont":
     st.subheader("🆕 Creare cont nou")
