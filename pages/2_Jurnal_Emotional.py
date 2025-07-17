@@ -117,15 +117,40 @@ with col2:
 with col3:
     delete_btn = st.button("🗑️ Șterge istoricul")
 
-# Analiză cuvânt
-if analiza_btn:
-    word_count = len(text_input.split())
-    st.markdown(f"""
-        <div class="result-box">
-            🔍 Ai scris <b>{word_count} cuvinte</b> azi. Fiecare cuvânt te apropie mai mult de tine.
-            <br><br><b>Continuă!</b> Reflecția zilnică este cheia emoțională a maturității.
-        </div>
-    """, unsafe_allow_html=True)
+from collections import Counter
+import re
+import enchant  # pip install pyenchant
+
+# La apăsarea butonului ANALIZEAZĂ
+if st.button("🔍 Analizează"):
+    if not continut.strip():
+        st.warning("Te rog scrie ceva înainte să analizezi.")
+    else:
+        numar_cuvinte = len(continut.split())
+        numar_fraze = continut.count('.') + continut.count('!') + continut.count('?')
+
+        # === Repetiții de cuvinte
+        cuvinte_curatate = re.findall(r'\b\w+\b', continut.lower())
+        cuvinte_repetate = {cuv: cnt for cuv, cnt in Counter(cuvinte_curatate).items() if cnt > 1}
+
+        # === Corectitudine ortografică
+        spell_checker = enchant.Dict("ro_RO")  # pentru limba română
+        greseli = [cuv for cuv in cuvinte_curatate if not spell_checker.check(cuv)]
+
+        st.success(f"📝 Ai scris **{numar_cuvinte}** cuvinte în **{numar_fraze}** fraze.")
+
+        if cuvinte_repetate:
+            st.info("🔁 Cuvinte repetate:")
+            for cuv, cnt in cuvinte_repetate.items():
+                st.write(f"- **{cuv}** apare de {cnt} ori")
+
+        if greseli:
+            st.warning("❌ Posibile greșeli de ortografie:")
+            st.write(", ".join(set(greseli)))
+        else:
+            st.success("✅ Nicio greșeală ortografică identificată.")
+
+        st.markdown("> ✨ *Continua să scrii zilnic. Fiecare cuvânt te aduce mai aproape de claritate.*")
 
 # Salvare jurnal
 if save_btn and text_input.strip():
