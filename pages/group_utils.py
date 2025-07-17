@@ -5,28 +5,32 @@ GRUPURI_FILE = "grupuri.json"
 
 def incarca_grupuri():
     if not os.path.exists(GRUPURI_FILE):
-        return {}
+        return []
     with open(GRUPURI_FILE, "r", encoding="utf-8") as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
-            return {}
+            return []
 
 def salveaza_grupuri(grupuri):
     with open(GRUPURI_FILE, "w", encoding="utf-8") as f:
-        json.dump(grupuri, f, indent=2, ensure_ascii=False)
+        json.dump(grupuri, f, ensure_ascii=False, indent=2)
 
 def adauga_grup(nume_grup, admin):
     grupuri = incarca_grupuri()
-    if nume_grup in grupuri:
-        return False, "Grupul deja există."
-    grupuri[nume_grup] = {
+    for grup in grupuri:
+        if grup["nume"] == nume_grup:
+            return False  # grup deja existent
+    grupuri.append({
+        "nume": nume_grup,
         "admin": admin,
         "membri": [admin],
         "cereri": []
-    }
+    })
     salveaza_grupuri(grupuri)
-    return True, "Grup creat cu succes."
+    return True
+
+# Alte funcții (trimite_cerere, aproba_cerere etc.) le putem adăuga la cerere
 
 def trimite_cerere(nume_grup, utilizator):
     grupuri = incarca_grupuri()
