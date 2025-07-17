@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="ReflectAI", page_icon="🧠", layout="centered")
 
-# Dacă utilizatorul e deja logat
+# Dacă utilizatorul e deja logat, du-l direct la jurnal
 if "utilizator" in st.session_state:
     st.switch_page("pages/2_Jurnal_Emotional.py")
 
@@ -25,8 +25,10 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("🔐 Autentificare"):
+        st.session_state["pagina_start"] = "Autentificare"
         st.switch_page("pages/1_ReflectAI_Autentificare.py")
 
 with col2:
     if st.button("🆕 Crează cont"):
+        st.session_state["pagina_start"] = "Crează cont"
         st.switch_page("pages/1_ReflectAI_Autentificare.py")
