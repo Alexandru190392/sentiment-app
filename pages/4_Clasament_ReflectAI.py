@@ -50,12 +50,10 @@ for fisier in fisiere:
         cuvinte_total = sum(len(entry["continut"].split()) for entry in entries)
         intrari_total = len(entries)
 
-        # Zile active (unicitate pe data calendaristică)
         zile = set(datetime.strptime(entry["data"], "%Y-%m-%d %H:%M").date() for entry in entries)
         zile_active = len(zile)
         medalie = calculeaza_medalie(zile_active)
 
-        # Avatar
         avatar_path = os.path.join(AVATAR_FOLDER, f"{username}.jpg")
         if os.path.exists(avatar_path):
             avatar_img = Image.open(avatar_path)
@@ -64,4 +62,32 @@ for fisier in fisiere:
 
         clasament.append({
             "avatar": avatar_img,
-            "us
+            "username": username,
+            "medalie": medalie,
+            "zile_active": zile_active,
+            "cuvinte": cuvinte_total,
+            "intrari": intrari_total
+        })
+
+    except Exception as e:
+        st.error(f"Eroare la procesarea fișierului pentru {username}: {e}")
+
+clasament = sorted(clasament, key=lambda x: x["cuvinte"], reverse=True)
+
+st.markdown("## 🔢 Clasament general:")
+
+for persoana in clasament:
+    col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 2])
+    with col1:
+        if persoana["avatar"]:
+            st.image(persoana["avatar"], width=60)
+        else:
+            st.markdown("🧑")
+    with col2:
+        st.markdown(f"**{persoana['username']}**")
+    with col3:
+        st.markdown(persoana["medalie"])
+    with col4:
+        st.markdown(f"🔥 {persoana['zile_active']} zile")
+    with col5:
+        st.markdown(f"✍️ {persoana['cuvinte']} cuvinte | 📘 {persoana['intrari']} intrări")
