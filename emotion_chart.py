@@ -1,67 +1,54 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
-import json
 import os
+import json
+import pandas as pd
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
 
-def extract_emotion(text):
-    # Înlocuiește cu un model real sau o analiză mai sofisticată
-    if "fericit" in text.lower():
-        return "Fericire"
-    elif "trist" in text.lower():
-        return "Tristețe"
-    elif "nervos" in text.lower():
-        return "Furie"
-    elif "calm" in text.lower():
-        return "Calm"
-    elif "stresat" in text.lower():
-        return "Stres"
-    else:
-        return "Neutru"
+def load_emotions_from_journal(username):
+    filepath = f"jurnale/{username}_journal.json"
 
-def load_emotions_from_journal(file_path="jurnal_salvat.txt"):
-    if not os.path.exists(file_path):
-        return pd.DataFrame(columns=["timestamp", "emotion"])
+    if not os.path.exists(filepath):
+        return pd.DataFrame()
 
-    data = []
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n\n")
-        for entry in lines:
-            if entry.strip():
-                try:
-                    timestamp_str = entry.split("]")[0][1:]
-                    text = entry.split("]")[1].strip()
-                    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
-                    emotion = extract_emotion(text)
-                    data.append({"timestamp": timestamp, "emotion": emotion})
-                except:
-                    continue
+    with open(filepath, "r", encoding="utf-8") as f:
+        entries = json.load(f)
 
-    return pd.DataFrame(data)
+    if not entries:
+        return pd.DataFrame()
 
-def show_emotion_chart(df, period="week"):
-    if df.empty:
-        return "📭 Nu există date încă. Scrie ceva în jurnal mai întâi."
+    df = pd.DataFrame(entries)
+    df["data"] = pd.to_datetime(df["data"], format="%Y-%m-%d %H:%M")
 
+    # Simulăm un scor emoțional pe baza lungimii textului (provizoriu)
+    df["scor"] = df["continut"].apply(lambda x: len(x.split()))
+
+    return df
+
+
+def show_emotion_chart(df, period):
     now = datetime.now()
 
     if period == "day":
-        cutoff = now - timedelta(days=1)
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     elif period == "week":
-        cutoff = now - timedelta(days=7)
+        start = now - timedelta(days=7)
     else:
-        cutoff = now - timedelta(days=30)
+        start = now - timedelta(days=30)
 
-    df_filtered = df[df["timestamp"] >= cutoff]
+    df_filtered = df[df["data"] >= start]
+
     if df_filtered.empty:
-        return "📭 Nicio emoție înregistrată în această perioadă."
+        return "📭 Nu există înregistrări în această perioadă."
 
-    emotion_counts = df_filtered["emotion"].value_counts()
+    df_grouped = df_filtered.groupby(df_filtered["data"].dt.date)["scor"].mean()
 
     fig, ax = plt.subplots()
-    emotion_counts.plot(kind="bar", color="skyblue", ax=ax)
-    ax.set_title("Frecvența emoțiilor")
-    ax.set_ylabel("Număr apariții")
-    ax.set_xlabel("Emoție")
+    df_grouped.plot(kind="line", marker="o", ax=ax)
+    ax.set_title("Evoluția scorului emoțional")
+    ax.set_ylabel("Scor (nr. cuvinte)")
+    ax.set_xlabel("Data")
+    ax.grid(True)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
     return fig
