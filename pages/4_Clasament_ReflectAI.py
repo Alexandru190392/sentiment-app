@@ -1,50 +1,67 @@
 import streamlit as st
 import os
 import json
+import pandas as pd
 from datetime import datetime
+from PIL import Image
 
-st.set_page_config(page_title="Panou Administrare", page_icon="🛠️")
-
-st.title("🛠️ Panou de Administrare ReflectAI")
-st.markdown("Vezi toți utilizatorii și statisticile lor de jurnal.")
+st.set_page_config(page_title="Clasament ReflectAI", page_icon="🏆")
+st.title("🏆 Clasament ReflectAI")
+st.markdown("Competiția sănătoasă începe! Vezi cine a fost consecvent și cât a scris.")
 
 JOURNAL_FOLDER = "jurnale"
+AVATAR_FOLDER = "avatars"
 
 if not os.path.exists(JOURNAL_FOLDER):
-    st.warning("📁 Folderul 'jurnale/' nu există încă.")
+    st.warning("📁 Folderul 'jurnale/' nu există.")
     st.stop()
 
 fisiere = [f for f in os.listdir(JOURNAL_FOLDER) if f.endswith("_journal.json")]
 
 if not fisiere:
-    st.info("📭 Nu există niciun jurnal salvat momentan.")
+    st.info("📭 Nu există jurnale salvate încă.")
     st.stop()
 
-date_useri = []
+clasament = []
+
+def calculeaza_medalie(zile_active):
+    if zile_active >= 30:
+        return "💎 Diamant"
+    elif zile_active >= 14:
+        return "🥇 Aur"
+    elif zile_active >= 7:
+        return "🥈 Argint"
+    elif zile_active >= 3:
+        return "🥉 Bronz"
+    else:
+        return "🪙 Început"
 
 for fisier in fisiere:
-    nume_user = fisier.replace("_journal.json", "")
+    username = fisier.replace("_journal.json", "")
     cale = os.path.join(JOURNAL_FOLDER, fisier)
+
     try:
         with open(cale, "r", encoding="utf-8") as f:
-            intrari = json.load(f)
-            nr_intrari = len(intrari)
+            entries = json.load(f)
 
-            if nr_intrari > 0:
-                ultima_data = intrari[-1]["data"]
-                titlu_ultim = intrari[-1].get("titlu", "(fără titlu)")
-            else:
-                ultima_data = "-"
-                titlu_ultim = "-"
+        if not entries:
+            continue
 
-            date_useri.append({
-                "Utilizator": nume_user,
-                "Intrări în jurnal": nr_intrari,
-                "Ultima salvare": ultima_data,
-                "Ultimul titlu": titlu_ultim
-            })
-    except Exception as e:
-        st.error(f"❌ Eroare la citirea fișierului pentru {nume_user}: {e}")
+        cuvinte_total = sum(len(entry["continut"].split()) for entry in entries)
+        intrari_total = len(entries)
 
-# ✅ Afișează tabel
-st.dataframe(date_useri, use_container_width=True)
+        # Zile active (unicitate pe data calendaristică)
+        zile = set(datetime.strptime(entry["data"], "%Y-%m-%d %H:%M").date() for entry in entries)
+        zile_active = len(zile)
+        medalie = calculeaza_medalie(zile_active)
+
+        # Avatar
+        avatar_path = os.path.join(AVATAR_FOLDER, f"{username}.jpg")
+        if os.path.exists(avatar_path):
+            avatar_img = Image.open(avatar_path)
+        else:
+            avatar_img = None
+
+        clasament.append({
+            "avatar": avatar_img,
+            "us
