@@ -3,8 +3,10 @@ from datetime import datetime
 import json
 import random
 import os
+import re
+from collections import Counter
 
-# Citate despre jurnal
+# === Citate motivaționale
 quotes = [
     "Un jurnal nu e doar despre trecut – e despre viitorul tău emoțional.",
     "Scrisul e oglinda sufletului tău în fiecare zi.",
@@ -18,62 +20,33 @@ quotes = [
     "Scrisul zilnic e exercițiul tău de sănătate emoțională.",
 ]
 
-# Stil CSS
+# === Stil
 st.markdown("""
     <style>
-        .stApp {
-            background-color: #F6F8FC;
-        }
-        h1 {
-            color: #5A4FCF;
-            font-size: 2.8em;
-            text-align: center;
-        }
-        .intro {
-            text-align: center;
-            font-size: 1.1em;
-            margin-bottom: 2em;
-            color: #555;
-        }
-        .result-box {
-            background-color: #EAF5EA;
-            padding: 1.2em;
-            border-left: 6px solid #4CAF50;
-            margin-top: 1.5em;
-            border-radius: 10px;
-            color: #2E7D32;
-        }
+        .stApp { background-color: #F6F8FC; }
+        h1 { color: #5A4FCF; font-size: 2.8em; text-align: center; }
+        .intro { text-align: center; font-size: 1.1em; margin-bottom: 2em; color: #555; }
+        .result-box { background-color: #EAF5EA; padding: 1.2em; border-left: 6px solid #4CAF50;
+                      margin-top: 1.5em; border-radius: 10px; color: #2E7D32; }
     </style>
 """, unsafe_allow_html=True)
 
-# Titlu și citat
+# === Titlu și citat
 st.markdown("<h1>📘 Jurnal Emoțional</h1>", unsafe_allow_html=True)
 st.markdown('<p class="intro">Scrie ce simți. Reflectă. Află ce emoții trăiești.</p>', unsafe_allow_html=True)
 st.info(f"💬 {random.choice(quotes)}")
 
-# Autentificare și citire utilizator
+# === Utilizatori
 utilizatori_path = "utilizatori.json"
 if not os.path.exists(utilizatori_path) or os.path.getsize(utilizatori_path) == 0:
-    default_users = {
-        "alexandru": {
-            "parola": "parolamea"
-        }
-    }
     with open(utilizatori_path, "w", encoding="utf-8") as f:
-        json.dump(default_users, f, indent=2, ensure_ascii=False)
+        json.dump({"alexandru": {"parola": "parolamea"}}, f, indent=2)
 
 try:
     with open(utilizatori_path, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-        if not content:
-            raise ValueError("Fișier gol")
-        users = json.loads(content)
+        users = json.load(f)
 except Exception:
-    st.error("⚠️ Fișierul 'utilizatori.json' este gol, invalid sau corupt. Te rog adaugă cel puțin un utilizator.")
-    st.stop()
-
-if not users or not isinstance(users, dict):
-    st.error("⚠️ Fișierul 'utilizatori.json' nu conține un dicționar de utilizatori.")
+    st.error("⚠️ Fișierul 'utilizatori.json' e invalid.")
     st.stop()
 
 if "utilizator" not in st.session_state:
@@ -81,35 +54,34 @@ if "utilizator" not in st.session_state:
     st.stop()
 
 current_user = st.session_state["utilizator"]
-# === Upload Avatar ===
+
+# === Avatar
 AVATAR_FOLDER = "avatars"
 os.makedirs(AVATAR_FOLDER, exist_ok=True)
+avatar_path = os.path.join(AVATAR_FOLDER, f"{current_user}.jpg")
 
 st.markdown("---")
 st.subheader("👤 Avatarul tău")
 
-avatar_path = os.path.join(AVATAR_FOLDER, f"{current_user}.jpg")
-
-# Afișăm avatarul curent dacă există
 if os.path.exists(avatar_path):
     st.image(avatar_path, width=100, caption="Avatarul tău actual")
 
-# Upload nou
 uploaded_avatar = st.file_uploader("Încarcă o imagine (JPG/PNG)", type=["jpg", "jpeg", "png"])
-if uploaded_avatar is not None:
+if uploaded_avatar:
     with open(avatar_path, "wb") as f:
         f.write(uploaded_avatar.read())
     st.success("✅ Avatar actualizat!")
     st.image(avatar_path, width=100, caption="Avatarul tău nou")
+
+# === Fișier jurnal
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
-# UI principal (fără div extra care crea spațiu alb)
+# === UI
 titlu_zi = st.text_input("🗓️ Titlul zilei")
-text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
+continut = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
 
-# Butoane
-col1, col2, col3 = st.columns([1, 1, 1])
+col1, col2, col3 = st.columns(3)
 with col1:
     analiza_btn = st.button("🔍 Analizează")
 with col2:
@@ -117,25 +89,28 @@ with col2:
 with col3:
     delete_btn = st.button("🗑️ Șterge istoricul")
 
-from collections import Counter
-import re
-import enchant  # pip install pyenchant
+# === Dicționar de cuvinte corecte de bază
+cuvinte_corecte = set([
+    "azi", "mâine", "viața", "titlu", "jurnal", "scris", "ce", "s-a", "întâmplat",
+    "este", "o", "zi", "bună", "te", "rog", "scrie", "emoții", "emoțională", "claritate",
+    "pas", "reflectă", "emoțional", "interioară", "poveste", "scrisul", "sufletului",
+])
 
-# La apăsarea butonului ANALIZEAZĂ
-if st.button("🔍 Analizează"):
+# === Funcție analiză text
+def analiza_text(text):
+    cuvinte = re.findall(r'\b\w+\b', text.lower())
+    numar_cuvinte = len(cuvinte)
+    numar_fraze = text.count('.') + text.count('!') + text.count('?')
+    cuvinte_repetate = {c: n for c, n in Counter(cuvinte).items() if n > 1}
+    greseli = [c for c in cuvinte if c not in cuvinte_corecte]
+    return numar_cuvinte, numar_fraze, cuvinte_repetate, list(set(greseli))
+
+# === ANALIZA
+if analiza_btn:
     if not continut.strip():
         st.warning("Te rog scrie ceva înainte să analizezi.")
     else:
-        numar_cuvinte = len(continut.split())
-        numar_fraze = continut.count('.') + continut.count('!') + continut.count('?')
-
-        # === Repetiții de cuvinte
-        cuvinte_curatate = re.findall(r'\b\w+\b', continut.lower())
-        cuvinte_repetate = {cuv: cnt for cuv, cnt in Counter(cuvinte_curatate).items() if cnt > 1}
-
-        # === Corectitudine ortografică
-        spell_checker = enchant.Dict("ro_RO")  # pentru limba română
-        greseli = [cuv for cuv in cuvinte_curatate if not spell_checker.check(cuv)]
+        numar_cuvinte, numar_fraze, cuvinte_repetate, greseli = analiza_text(continut)
 
         st.success(f"📝 Ai scris **{numar_cuvinte}** cuvinte în **{numar_fraze}** fraze.")
 
@@ -146,16 +121,16 @@ if st.button("🔍 Analizează"):
 
         if greseli:
             st.warning("❌ Posibile greșeli de ortografie:")
-            st.write(", ".join(set(greseli)))
+            st.write(", ".join(greseli))
         else:
             st.success("✅ Nicio greșeală ortografică identificată.")
 
         st.markdown("> ✨ *Continua să scrii zilnic. Fiecare cuvânt te aduce mai aproape de claritate.*")
 
-# Salvare jurnal
-if save_btn and text_input.strip():
+# === SALVARE
+if save_btn and continut.strip():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    entry = {"data": now, "titlu": titlu_zi, "continut": text_input}
+    entry = {"data": now, "titlu": titlu_zi, "continut": continut}
 
     if os.path.exists(user_file):
         with open(user_file, "r", encoding="utf-8") as f:
@@ -167,14 +142,9 @@ if save_btn and text_input.strip():
     with open(user_file, "w", encoding="utf-8") as f:
         json.dump(jurnal, f, indent=2, ensure_ascii=False)
 
-    st.markdown("""
-        <div class="result-box">
-            ✅ Jurnalul a fost salvat! Ai făcut un pas spre înțelegerea ta interioară. 📘
-            <br><br><b>Felicitări!</b> Fiecare zi e diferită. Azi ai ales să fii prezent.
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="result-box">✅ Jurnalul a fost salvat! Ai făcut un pas spre înțelegerea ta interioară. 📘<br><br><b>Felicitări!</b> Fiecare zi e diferită. Azi ai ales să fii prezent.</div>""", unsafe_allow_html=True)
 
-# Ștergere istoric
+# === ȘTERGERE
 if delete_btn:
     if os.path.exists(user_file):
         os.remove(user_file)
