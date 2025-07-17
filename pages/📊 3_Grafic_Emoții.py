@@ -1,55 +1,91 @@
 import streamlit as st
-from emotion_chart import load_emotions_from_journal, show_emotion_chart
+import os
 import json
-import streamlit as st
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+from collections import Counter
+import re
 
-# === Încărcare roata emoțiilor în română ===
-with open("emotii_romana.json", "r", encoding="utf-8") as f:
-    roata_emotii = json.load(f)
+st.set_page_config(page_title="Grafic Emoții", page_icon="📈")
+st.title("📈 Evoluția Emoțiilor")
 
-st.markdown("## 🌈 Explorare Emoții")
-st.write("Selectează emoțiile pentru a reflecta mai profund asupra stării tale.")
+PERIOADE = {
+    "Ultima oră": timedelta(hours=1),
+    "Ultima zi": timedelta(days=1),
+    "Ultimele 2 zile": timedelta(days=2),
+    "Ultima săptămână": timedelta(weeks=1),
+    "Ultima lună": timedelta(days=30),
+    "Ultimul an": timedelta(days=365),
+}
 
-# === Selecție în 3 niveluri ===
-emoție_principală = st.selectbox("1. Emoție de bază", list(roata_emotii.keys()))
-subemoții = list(roata_emotii[emoție_principală].keys())
-emoție_secundară = st.selectbox("2. Emoție intermediară", subemoții)
-detalii = roata_emotii[emoție_principală][emoție_secundară]
-emoție_finală = st.selectbox("3. Emoție detaliată", detalii)
+optiune = st.selectbox("Selectează perioada pentru analiză:", list(PERIOADE.keys()))
 
-# Afișare rezultat
-st.success(f"✅ Emoția ta selectată este: **{emoție_finală}**")
-
-st.set_page_config(page_title="Grafic Emoțional", page_icon="📊")
-
-st.title("📊 Grafic Emoțional")
-st.markdown("Analizează cum s-au schimbat emoțiile tale de-a lungul timpului.")
-
-# ✅ Verifică autentificarea
+JOURNAL_FOLDER = "jurnale"
 if "utilizator" not in st.session_state:
-    st.warning("🔒 Trebuie să fii autentificat pentru a vedea graficul emoțional.")
+    st.warning("Te rog autentifică-te mai întâi.")
     st.stop()
 
 current_user = st.session_state["utilizator"]
+cale_jurnal = os.path.join(JOURNAL_FOLDER, f"{current_user}_journal.json")
 
-# ✅ Încarcă jurnalul pentru utilizatorul curent
-df = load_emotions_from_journal(current_user)
-
-# ✅ Verifică dacă există date
-if df.empty:
-    st.warning("📭 Nu există date încă. Scrie ceva în jurnal mai întâi.")
+if not os.path.exists(cale_jurnal):
+    st.info("Nu există jurnale salvate pentru acest utilizator.")
     st.stop()
 
-# ✅ Selectare perioadă
-optiune = st.selectbox("📆 Alege perioada", ["Ziua de azi", "Ultima săptămână", "Ultima lună"])
+try:
+    with open(cale_jurnal, "r", encoding="utf-8") as f:
+        jurnal = json.load(f)
+except:
+    st.error("Eroare la citirea fișierului jurnal.")
+    st.stop()
 
-if optiune == "Ziua de azi":
-    period = "day"
-elif optiune == "Ultima săptămână":
-    period = "week"
-else:
-    period = "month"
+# === Extrage emoții (simulat) ===
+def extrage_emoții(text):
+    # Cuvinte cheie simplificate pentru emoții de bază
+    emotii = {
+        "fericit": ["fericit", "bucurie", "entuziasm", "recunoscător", "încântat"],
+        "trist": ["trist", "melancolic", "pierdut", "plâns"],
+        "nervos": ["nervos", "furios", "supărat", "iritat"],
+        "îngrijorat": ["îngrijorat", "anxios", "temător", "nesigur"],
+        "calm": ["calm", "liniște", "pace", "relaxat"],
+        "confuz": ["confuz", "derutat", "neclar"],
+    }
+    count = Counter()
+    cuvinte = re.findall(r'\b\w+\b', text.lower())
+    for emotie, chei in emotii.items():
+        count[emotie] += sum(cuvinte.count(cuv) for cuv in chei)
+    return count
 
-# ✅ Afișează graficul
-fig = show_emotion_chart(df, period)
+# === Filtrare în funcție de perioada selectată ===
+perioada_aleasa = PERIOADE[optiune]
+acum = datetime.now()
+
+emoții_total = Counter()
+for intrare in jurnal:
+    try:
+        data = datetime.strptime(intrare["data"], "%Y-%m-%d %H:%M")
+    except:
+        continue
+    if acum - data <= perioada_aleasa:
+        continut = intrare.get("continut", "")
+        emoții_total += extrage_emoții(continut)
+
+if not emoții_total:
+    st.info("Nu au fost detectate emoții în perioada selectată.")
+    st.stop()
+
+# === Afișare grafice ===
+st.markdown("### Distribuția Emoțiilor:")
+labels = list(emoții_total.keys())
+valori = list(emoții_total.values())
+
+fig, ax = plt.subplots()
+ax.pie(valori, labels=labels, autopct="%1.1f%%", startangle=90)
+ax.axis('equal')
 st.pyplot(fig)
+
+# === Legendă simplă ===
+st.markdown("---")
+st.markdown("**📊 Emoții detectate:**")
+for emotie, val in emoții_total.items():
+    st.write(f"- {emotie.capitalize()}: {val} mențiuni")
