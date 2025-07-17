@@ -76,18 +76,42 @@ clasament = sorted(clasament, key=lambda x: x["cuvinte"], reverse=True)
 
 st.markdown("## 🔢 Clasament general:")
 
-for persoana in clasament:
-    col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 2])
-    with col1:
-        if persoana["avatar"]:
-            st.image(persoana["avatar"], width=60)
-        else:
-            st.markdown("🧑")
-    with col2:
-        st.markdown(f"**{persoana['username']}**")
-    with col3:
-        st.markdown(persoana["medalie"])
-    with col4:
-        st.markdown(f"🔥 {persoana['zile_active']} zile")
-    with col5:
-        st.markdown(f"✍️ {persoana['cuvinte']} cuvinte | 📘 {persoana['intrari']} intrări")
+for i, persoana in enumerate(clasament):
+    # Fundal în funcție de loc
+    if i == 0:
+        st.markdown("### 🥇 Locul 1")
+        bg_color = "#FFFACD"  # Auriu
+    elif i == 1:
+        st.markdown("### 🥈 Locul 2")
+        bg_color = "#E0E0E0"  # Argintiu
+    elif i == 2:
+        st.markdown("### 🥉 Locul 3")
+        bg_color = "#FFDAB9"  # Bronz
+    else:
+        bg_color = "#F9F9F9"
+
+    with st.container():
+        st.markdown(
+            f"""
+            <div style="background-color:{bg_color}; padding:10px; border-radius:10px; margin-bottom:10px;">
+            <div style="display:flex; align-items:center;">
+            """,
+            unsafe_allow_html=True
+        )
+
+        col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 2])
+        with col1:
+            if persoana["avatar"]:
+                st.image(persoana["avatar"], width=60)
+            else:
+                st.markdown("🧑")
+        with col2:
+            st.markdown(f"**{persoana['username']}**")
+        with col3:
+            st.markdown(persoana["medalie"])
+        with col4:
+            st.markdown(f"🔥 {persoana['zile_active']} zile")
+        with col5:
+            st.markdown(f"✍️ {persoana['cuvinte']} cuvinte | 📘 {persoana['intrari']} intrări")
+
+        st.markdown("</div></div>", unsafe_allow_html=True)
