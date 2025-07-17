@@ -93,8 +93,15 @@ for i, persoana in enumerate(clasament):
     # === CALCUL progres spre următoarea medalie
     zile = persoana["zile_active"]
     praguri = [3, 7, 14, 30, 999]
-    nivel_curent = max([p for p in praguri if zile >= p])
-    prag_urmator = min([p for p in praguri if p > zile])
+    niveluri_posibile = [p for p in praguri if zile >= p]
+if niveluri_posibile:
+    nivel_curent = max(niveluri_posibile)
+else:
+    nivel_curent = 0
+
+praguri_viitoare = [p for p in praguri if p > zile]
+prag_urmator = min(praguri_viitoare) if praguri_viitoare else nivel_curent + 1
+
     progres_pct = int((zile / prag_urmator) * 100)
 
     # === Badge-uri extra
