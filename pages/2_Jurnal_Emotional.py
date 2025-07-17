@@ -35,14 +35,6 @@ st.markdown("""
             margin-bottom: 2em;
             color: #555;
         }
-        .journal-box {
-            background-color: white;
-            padding: 1.5em;
-            border-radius: 12px;
-            max-width: 700px;
-            margin: auto;
-            box-shadow: 0 0 6px rgba(0,0,0,0.05);
-        }
         .result-box {
             background-color: #EAF5EA;
             padding: 1.2em;
@@ -88,15 +80,11 @@ current_user = list(users.keys())[0]
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
-# UI principal
-with st.container():
-    st.markdown('<div class="journal-box">', unsafe_allow_html=True)
+# UI principal (fără div extra care crea spațiu alb)
+titlu_zi = st.text_input("🗓️ Titlul zilei")
+text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
 
-    titlu_zi = st.text_input("🗓️ Titlul zilei")
-    text_input = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
+# Butoane
 col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
     analiza_btn = st.button("🔍 Analizează")
@@ -105,6 +93,7 @@ with col2:
 with col3:
     delete_btn = st.button("🗑️ Șterge istoricul")
 
+# Analiză cuvânt
 if analiza_btn:
     word_count = len(text_input.split())
     st.markdown(f"""
@@ -114,6 +103,7 @@ if analiza_btn:
         </div>
     """, unsafe_allow_html=True)
 
+# Salvare jurnal
 if save_btn and text_input.strip():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = {"data": now, "titlu": titlu_zi, "continut": text_input}
@@ -135,6 +125,7 @@ if save_btn and text_input.strip():
         </div>
     """, unsafe_allow_html=True)
 
+# Ștergere istoric
 if delete_btn:
     if os.path.exists(user_file):
         os.remove(user_file)
