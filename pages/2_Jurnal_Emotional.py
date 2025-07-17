@@ -76,7 +76,11 @@ if not users or not isinstance(users, dict):
     st.error("⚠️ Fișierul 'utilizatori.json' nu conține un dicționar de utilizatori.")
     st.stop()
 
-current_user = list(users.keys())[0]
+if "utilizator" not in st.session_state:
+    st.error("⚠️ Niciun utilizator autentificat. Te rog loghează-te mai întâi.")
+    st.stop()
+
+current_user = st.session_state["utilizator"]
 user_file = f"jurnale/{current_user}_journal.json"
 os.makedirs("jurnale", exist_ok=True)
 
