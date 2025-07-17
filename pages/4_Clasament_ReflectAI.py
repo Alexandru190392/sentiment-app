@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 from group_utils import load_grupuri, adauga_grup, trimite_cerere, aproba_cerere
 import streamlit as st
 import os
