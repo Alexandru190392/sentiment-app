@@ -1,15 +1,7 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__)))
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from group_utils import load_grupuri, adauga_grup, trimite_cerere, aproba_cerere
 import streamlit as st
 import os
 import json
-import pandas as pd
 from datetime import datetime
 from PIL import Image
 
@@ -85,7 +77,6 @@ clasament = sorted(clasament, key=lambda x: x["cuvinte"], reverse=True)
 st.markdown("## 🔢 Clasament general:")
 
 for i, persoana in enumerate(clasament):
-    # Fundal în funcție de loc
     if i == 0:
         st.markdown("### 🥇 Locul 1")
         bg_color = "#FFFACD"
@@ -98,22 +89,14 @@ for i, persoana in enumerate(clasament):
     else:
         bg_color = "#F9F9F9"
 
-        # === CALCUL progres spre următoarea medalie
     zile = persoana["zile_active"]
     praguri = [3, 7, 14, 30, 999]
-
     niveluri_posibile = [p for p in praguri if zile >= p]
-    if niveluri_posibile:
-        nivel_curent = max(niveluri_posibile)
-    else:
-        nivel_curent = 0
-
+    nivel_curent = max(niveluri_posibile) if niveluri_posibile else 0
     praguri_viitoare = [p for p in praguri if p > zile]
     prag_urmator = min(praguri_viitoare) if praguri_viitoare else nivel_curent + 1
-
     progres_pct = int((zile / prag_urmator) * 100) if prag_urmator > 0 else 0
 
-    # === Badge-uri extra
     badgeuri = []
     if persoana["cuvinte"] >= 1000:
         badgeuri.append("🐉 1000+ cuvinte")
@@ -144,12 +127,13 @@ for i, persoana in enumerate(clasament):
         with col4:
             st.markdown(f"🔥 {zile} zile")
         with col5:
-            st.markdown(f"✍️ {persoana['cuvinte']} cuvinte<br>📘 {persoana['intrari']} intrări", unsafe_allow_html=True)
+            st.markdown(
+                f"✍️ {persoana['cuvinte']} cuvinte<br>📘 {persoana['intrari']} intrări",
+                unsafe_allow_html=True
+            )
 
-        # 🔋 Bară de progres
         st.progress(progres_pct, text=f"Progres către următoarea medalie: {zile}/{prag_urmator} zile")
 
-        # 🏅 Badge-uri ReflectAI
         if badgeuri:
             st.markdown("**🏅 Badge-uri ReflectAI:** " + " | ".join(badgeuri))
 
