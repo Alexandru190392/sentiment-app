@@ -30,25 +30,27 @@ def adauga_grup(nume_grup, admin):
     salveaza_grupuri(grupuri)
     return True
 
-# Alte funcții (trimite_cerere, aproba_cerere etc.) le putem adăuga la cerere
-
 def trimite_cerere(nume_grup, utilizator):
     grupuri = incarca_grupuri()
-    if nume_grup not in grupuri:
-        return False, "Grupul nu există."
-    if utilizator in grupuri[nume_grup]["membri"]:
-        return False, "Ești deja în acest grup."
-    if utilizator in grupuri[nume_grup]["cereri"]:
-        return False, "Cerere deja trimisă."
-    grupuri[nume_grup]["cereri"].append(utilizator)
-    salveaza_grupuri(grupuri)
-    return True, "Cererea a fost trimisă."
+    for grup in grupuri:
+        if grup["nume"] == nume_grup:
+            if utilizator in grup["membri"]:
+                return False, "Ești deja în acest grup."
+            if utilizator in grup["cereri"]:
+                return False, "Cererea a fost deja trimisă."
+            grup["cereri"].append(utilizator)
+            salveaza_grupuri(grupuri)
+            return True, "Cererea a fost trimisă."
+    return False, "Grupul nu a fost găsit."
 
 def aproba_cerere(nume_grup, utilizator):
     grupuri = incarca_grupuri()
-    if utilizator in grupuri[nume_grup]["cereri"]:
-        grupuri[nume_grup]["cereri"].remove(utilizator)
-        grupuri[nume_grup]["membri"].append(utilizator)
-        salveaza_grupuri(grupuri)
-        return True, "Utilizator aprobat."
-    return False, "Cererea nu a fost găsită."
+    for grup in grupuri:
+        if grup["nume"] == nume_grup:
+            if utilizator in grup["cereri"]:
+                grup["cereri"].remove(utilizator)
+                grup["membri"].append(utilizator)
+                salveaza_grupuri(grupuri)
+                return True, "Utilizatorul a fost aprobat."
+            return False, "Cererea nu a fost găsită."
+    return False, "Grupul nu a fost găsit."
