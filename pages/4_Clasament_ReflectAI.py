@@ -80,15 +80,31 @@ for i, persoana in enumerate(clasament):
     # Fundal în funcție de loc
     if i == 0:
         st.markdown("### 🥇 Locul 1")
-        bg_color = "#FFFACD"  # Auriu
+        bg_color = "#FFFACD"
     elif i == 1:
         st.markdown("### 🥈 Locul 2")
-        bg_color = "#E0E0E0"  # Argintiu
+        bg_color = "#E0E0E0"
     elif i == 2:
         st.markdown("### 🥉 Locul 3")
-        bg_color = "#FFDAB9"  # Bronz
+        bg_color = "#FFDAB9"
     else:
         bg_color = "#F9F9F9"
+
+    # === CALCUL progres spre următoarea medalie
+    zile = persoana["zile_active"]
+    praguri = [3, 7, 14, 30, 999]
+    nivel_curent = max([p for p in praguri if zile >= p])
+    prag_urmator = min([p for p in praguri if p > zile])
+    progres_pct = int((zile / prag_urmator) * 100)
+
+    # === Badge-uri extra
+    badgeuri = []
+    if persoana["cuvinte"] >= 1000:
+        badgeuri.append("🐉 1000+ cuvinte")
+    if zile >= 10:
+        badgeuri.append("🎯 10+ zile active")
+    if persoana["intrari"] >= 20:
+        badgeuri.append("📚 20+ intrări")
 
     with st.container():
         st.markdown(
@@ -110,8 +126,15 @@ for i, persoana in enumerate(clasament):
         with col3:
             st.markdown(persoana["medalie"])
         with col4:
-            st.markdown(f"🔥 {persoana['zile_active']} zile")
+            st.markdown(f"🔥 {zile} zile")
         with col5:
-            st.markdown(f"✍️ {persoana['cuvinte']} cuvinte | 📘 {persoana['intrari']} intrări")
+            st.markdown(f"✍️ {persoana['cuvinte']} cuvinte<br>📘 {persoana['intrari']} intrări", unsafe_allow_html=True)
+
+        # 🔋 Bară de progres
+        st.progress(progres_pct, text=f"Progres către următoarea medalie: {zile}/{prag_urmator} zile")
+
+        # 🏅 Badge-uri ReflectAI
+        if badgeuri:
+            st.markdown("**🏅 Badge-uri ReflectAI:** " + " | ".join(badgeuri))
 
         st.markdown("</div></div>", unsafe_allow_html=True)
