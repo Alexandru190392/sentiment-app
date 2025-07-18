@@ -112,20 +112,31 @@ cuvinte_corecte = set([
 ])
 
 # === Funcție analiză text
-def analiza_text(text):
+def analiza_extinsa(text):
     cuvinte = re.findall(r'\b\w+\b', text.lower())
-    numar_cuvinte = len(cuvinte)
-    numar_fraze = text.count('.') + text.count('!') + text.count('?')
+    numar_total = len(cuvinte)
+    numar_fraze = len(re.findall(r'[.!?]', text))
     cuvinte_repetate = {c: n for c, n in Counter(cuvinte).items() if n > 1}
     greseli = [c for c in cuvinte if c not in cuvinte_corecte]
-    return numar_cuvinte, numar_fraze, cuvinte_repetate, list(set(greseli))
+    corecte = [c for c in cuvinte if c in cuvinte_corecte]
+    procent_corect = int((len(corecte) / numar_total) * 100) if numar_total > 0 else 0
+
+    fraze_inspirationale = []
+    fraze = re.split(r'[.!?]', text)
+    for fraza in fraze:
+        if len(fraza.split()) > 4 and any(word in fraza.lower() for word in [
+            "vis", "speranță", "putere", "curaj", "iubire", "libertate", "cred", "merit", "încercare"
+        ]):
+            fraze_inspirationale.append(fraza.strip())
+
+    return numar_total, numar_fraze, procent_corect, cuvinte_repetate, list(set(greseli)), fraze_inspirationale
 
 # === ANALIZA
 if analiza_btn:
     if not continut.strip():
         st.warning("Te rog scrie ceva înainte să analizezi.")
     else:
-        numar_cuvinte, numar_fraze, cuvinte_repetate, greseli = analiza_text(continut)
+        numar_cuvinte, numar_fraze, procent_corect, cuvinte_repetate, greseli, fraze_insp = analiza_extinsa(continut)
 
         st.success(f"📝 Ai scris **{numar_cuvinte}** cuvinte în **{numar_fraze}** fraze.")
 
@@ -135,10 +146,19 @@ if analiza_btn:
                 st.write(f"- **{cuv}** apare de {cnt} ori")
 
         if greseli:
-            st.warning("❌ Posibile greșeli de ortografie:")
+            st.warning(f"❌ Posibile greșeli gramaticale ({100 - procent_corect}% erori):")
             st.write(", ".join(greseli))
         else:
             st.success("✅ Nicio greșeală ortografică identificată.")
+
+        st.info(f"✅ Corectitudine gramaticală estimată: **{procent_corect}%**")
+
+        if fraze_insp:
+            st.markdown("✨ **Fraze inspiraționale detectate:**")
+            for f in fraze_insp:
+                st.write(f"• _{f}_")
+        else:
+            st.markdown("💡 *Nicio frază inspirațională detectată în această intrare.*")
 
         st.markdown("> ✨ *Continua să scrii zilnic. Fiecare cuvânt te aduce mai aproape de claritate.*")
 
