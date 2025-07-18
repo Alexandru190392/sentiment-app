@@ -158,9 +158,14 @@ if analiza_btn:
     if not continut.strip():
         st.warning("Te rog scrie ceva înainte să analizezi.")
     else:
-        numar_cuvinte, numar_fraze, _, _, _, fraze_insp = analiza_extinsa(continut)
+        numar_cuvinte, numar_fraze, procent_corect, cuvinte_repetate, greseli, fraze_insp = analiza_extinsa(continut)
 
         st.success(f"📝 Ai scris **{numar_cuvinte}** cuvinte în **{numar_fraze}** fraze.")
+
+        if cuvinte_repetate:
+            st.info("🔁 Cuvinte repetate:")
+            for cuv, cnt in cuvinte_repetate.items():
+                st.write(f"- **{cuv}** apare de {cnt} ori")
 
         if fraze_insp:
             st.markdown("✨ **Fraze inspiraționale detectate:**")
@@ -170,25 +175,6 @@ if analiza_btn:
             st.markdown("💡 *Nicio frază inspirațională detectată în această intrare.*")
 
         st.markdown("> ✨ *Continua să scrii zilnic. Fiecare cuvânt te aduce mai aproape de claritate.*")
-
-# === VERIFICARE GRAMATICALĂ
-if gram_btn:
-    if not continut.strip():
-        st.warning("Te rog scrie ceva înainte să verificăm gramatical.")
-    else:
-        corectat, sugestii, procent_corect = verifica_gramatical(continut)
-
-        st.success(f"✅ Corectitudine gramaticală estimată: **{procent_corect}%**")
-
-        if sugestii:
-            st.warning("📌 Sugestii de corectare:")
-            for s in sugestii:
-                st.write(f"• _{s['text_gresit']}_ — {s['mesaj']}")
-                if s['sugestii']:
-                    st.markdown(f"  ➤ Sugestii: **{', '.join(s['sugestii'])}**")
-
-        st.markdown("### 📘 Text corectat propus:")
-        st.code(corectat, language='markdown')
 
 # === SALVARE
 if save_btn and continut.strip():
