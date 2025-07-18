@@ -1,3 +1,4 @@
+import language_tool_python
 import streamlit as st
 from datetime import datetime
 import json
@@ -96,13 +97,15 @@ os.makedirs("jurnale", exist_ok=True)
 titlu_zi = st.text_input("🗓️ Titlul zilei")
 continut = st.text_area("✍️ Ce s-a întâmplat azi în viața ta?", height=200)
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     analiza_btn = st.button("🔍 Analizează")
 with col2:
     save_btn = st.button("💾 Salvează jurnalul")
 with col3:
     delete_btn = st.button("🗑️ Șterge istoricul")
+with col4:
+    gram_btn = st.button("🔤 Verifică gramatical")
 
 # === Dicționar de cuvinte corecte de bază
 cuvinte_corecte = set([
@@ -110,6 +113,25 @@ cuvinte_corecte = set([
     "este", "o", "zi", "bună", "te", "rog", "scrie", "emoții", "emoțională", "claritate",
     "pas", "reflectă", "emoțional", "interioară", "poveste", "scrisul", "sufletului",
 ])
+
+def verifica_gramatical(text):
+    try:
+        tool = language_tool_python.LanguageTool('ro')
+        matches = tool.check(text)
+        corectat = language_tool_python.utils.correct(text, matches)
+
+        sugestii = []
+        for match in matches:
+            sugestii.append({
+                "text_gresit": match.context.strip(),
+                "mesaj": match.message,
+                "sugestii": match.replacements
+            })
+
+        procent_corect = 100 - int((len(matches) / max(len(text.split()), 1)) * 100)
+        return corectat, sugestii, procent_corect
+    except Exception as e:
+        return text, [{"text_gresit": "", "mesaj": "Eroare la verificare: " + str(e), "sugestii": []}], 0
 
 # === Funcție analiză text
 def analiza_extinsa(text):
@@ -161,6 +183,24 @@ if analiza_btn:
             st.markdown("💡 *Nicio frază inspirațională detectată în această intrare.*")
 
         st.markdown("> ✨ *Continua să scrii zilnic. Fiecare cuvânt te aduce mai aproape de claritate.*")
+
+if gram_btn:
+    if not continut.strip():
+        st.warning("Te rog scrie ceva înainte să verificăm gramatical.")
+    else:
+        corectat, sugestii, procent_corect = verifica_gramatical(continut)
+
+        st.success(f"✅ Corectitudine gramaticală estimată: **{procent_corect}%**")
+
+        if sugestii:
+            st.warning("📌 Sugestii de corectare:")
+            for s in sugestii:
+                st.write(f"• _{s['text_gresit']}_ — {s['mesaj']}")
+                if s['sugestii']:
+                    st.markdown(f"  ➤ Sugestii: **{', '.join(s['sugestii'])}**")
+
+        st.markdown("### 📘 Text corectat propus:")
+        st.code(corectat, language='markdown')
 
 # === SALVARE
 if save_btn and continut.strip():
