@@ -5,3 +5,4 @@ transformers>=4.25.0
 torch
 pandas
 matplotlib
+import language_tool_python
