@@ -39,16 +39,19 @@ except:
     st.error("Eroare la citirea fișierului jurnal.")
     st.stop()
 
-# === Extrage emoții (simulat) ===
+# === Extrage emoții (extins) ===
 def extrage_emoții(text):
-    # Cuvinte cheie simplificate pentru emoții de bază
     emotii = {
-        "fericit": ["fericit", "bucurie", "entuziasm", "recunoscător", "încântat"],
-        "trist": ["trist", "melancolic", "pierdut", "plâns"],
-        "nervos": ["nervos", "furios", "supărat", "iritat"],
-        "îngrijorat": ["îngrijorat", "anxios", "temător", "nesigur"],
-        "calm": ["calm", "liniște", "pace", "relaxat"],
-        "confuz": ["confuz", "derutat", "neclar"],
+        "fericit": ["fericit", "bucurie", "entuziasm", "recunoscător", "încântat", "satisfăcut", "mândru", "optimist"],
+        "trist": ["trist", "melancolic", "pierdut", "plâns", "dezamăgit", "abătut", "nefericit"],
+        "nervos": ["nervos", "furios", "supărat", "iritat", "enervat", "agitat", "exasperat"],
+        "îngrijorat": ["îngrijorat", "anxios", "temător", "nesigur", "fricos", "tensionat", "neliniștit"],
+        "calm": ["calm", "liniște", "pace", "relaxat", "echilibrat", "clar", "seren"],
+        "confuz": ["confuz", "derutat", "neclar", "ambiguu", "dezorientat"],
+        "iubit": ["iubit", "acceptat", "sprijinit", "împărtășit", "conectat"],
+        "singur": ["singur", "izolat", "neînțeles", "respins", "părăsit"],
+        "curajos": ["curajos", "hotărât", "puternic", "neînfricat", "rezilient"],
+        "rușinat": ["rușinat", "jenat", "vinovat", "stânjenit"]
     }
     count = Counter()
     cuvinte = re.findall(r'\b\w+\b', text.lower())
