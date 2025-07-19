@@ -200,3 +200,23 @@ if delete_btn:
         st.success("🧹 Istoricul jurnalului a fost șters complet.")
     else:
         st.warning("⚠️ Nu există jurnal salvat.")
+
+# === VERIFICARE GRAMATICALĂ
+if gram_btn and continut.strip():
+    st.markdown("---")
+    st.subheader("🔤 Rezultate verificare gramaticală")
+
+    corectat, sugestii, procent = verifica_gramatical(continut)
+
+    st.write(f"✅ Textul tău este corect în proporție de **{procent}%**.")
+
+    if sugestii:
+        for idx, sug in enumerate(sugestii, start=1):
+            st.warning(f"🛠️ *{sug['mesaj']}*")
+            if sug["sugestii"]:
+                st.write(f"🔁 Sugestii: `{', '.join(sug['sugestii'])}`")
+    else:
+        st.success("🎉 Nicio greșeală gramaticală detectată!")
+
+    st.markdown("📄 **Text corectat:**")
+    st.code(corectat, language="markdown")
